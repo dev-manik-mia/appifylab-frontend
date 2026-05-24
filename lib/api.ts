@@ -1,7 +1,9 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://appifylab-backend.test/api';
+import type { Comment } from '@/lib/types';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8001/api';
 
 class ApiClient {
-  private baseUrl: string;
+  private readonly baseUrl: string;
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
@@ -38,7 +40,9 @@ class ApiClient {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ message: 'Request failed' }));
-      throw new Error(error.message || 'Request failed');
+      const err = new Error(error.message || 'Request failed') as Error & { errors?: Record<string, string[]> };
+      err.errors = error.errors;
+      throw err;
     }
 
     return response.json();
@@ -83,11 +87,11 @@ class ApiClient {
   }
 
   async logout() {
-    return this.post<{ success: boolean; message: string }>('/auth/logout');
+    return this.post<{ success: boolean; message: string }>('/logout');
   }
 
   async me() {
-    return this.get<{ success: boolean; data: unknown }>('/auth/me');
+    return this.get<{ success: boolean; data: unknown }>('/me');
   }
 
   // Posts
@@ -107,6 +111,19 @@ class ApiClient {
 
   async likeToggle(data: { likeable_id: number; likeable_type: string }) {
     return this.post<{ success: boolean; data: unknown }>('/likes/toggle', data);
+  }
+
+  // Comments
+  async getComments(postId: number) {
+    return this.get<{ success: boolean; data: Comment[] }>(`/posts/${postId}/comments`);
+  }
+
+  async createComment(postId: number, data: { content: string; parent_id?: number | null }) {
+    return this.post<{ success: boolean; data: Comment }>(`/posts/${postId}/comments`, data);
+  }
+
+  async deleteComment(commentId: number) {
+    return this.delete<{ success: boolean; message: string }>(`/comments/${commentId}`);
   }
 }
 

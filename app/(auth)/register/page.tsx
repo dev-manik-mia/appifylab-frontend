@@ -29,7 +29,14 @@ export default function RegisterPage() {
     try {
       await register(firstName, lastName, email, password);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Registration failed');
+      const message = err instanceof Error ? err.message : 'Registration failed';
+      const fieldErrors = (err as Error & { errors?: Record<string, string[]> }).errors;
+      if (fieldErrors) {
+        const messages = Object.values(fieldErrors).flat();
+        setError(messages.join('. '));
+      } else {
+        setError(message);
+      }
     } finally {
       setLoading(false);
     }

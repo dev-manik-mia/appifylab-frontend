@@ -1,7 +1,6 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 
 interface User {
@@ -22,11 +21,19 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+function setCookie(name: string, value: string, days: number = 7) {
+  const expires = new Date(Date.now() + days * 864e5).toUTCString();
+  document.cookie = `${name}=${value}; expires=${expires}; path=/; SameSite=Lax`;
+}
+
+function removeCookie(name: string) {
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax`;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
   const fetchUser = useCallback(async () => {
     try {
@@ -36,6 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(null);
       setUser(null);
       localStorage.removeItem('token');
+      removeCookie('token');
     }
   }, []);
 
@@ -53,18 +61,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const res = await api.login(email, password);
     const { token: newToken, user: newUser } = res.data as { token: string; user: User };
     localStorage.setItem('token', newToken);
+    setCookie('token', newToken);
     setToken(newToken);
     setUser(newUser);
-    router.push('/feed');
+    window.location.href = '/';
   };
 
   const register = async (firstName: string, lastName: string, email: string, password: string) => {
     const res = await api.register({ first_name: firstName, last_name: lastName, email, password });
     const { token: newToken, user: newUser } = res.data as { token: string; user: User };
     localStorage.setItem('token', newToken);
+    setCookie('token', newToken);
     setToken(newToken);
     setUser(newUser);
-    router.push('/feed');
+    window.location.href = '/';
   };
 
   const logout = async () => {
@@ -74,9 +84,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // ignore
     }
     localStorage.removeItem('token');
+    removeCookie('token');
     setToken(null);
     setUser(null);
-    router.push('/login');
+    window.location.href = '/login';
   };
 
   return (

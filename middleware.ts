@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 
 const publicPaths = ['/login', '/register'];
 
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const token = request.cookies.get('token')?.value || 
     request.headers.get('authorization')?.replace('Bearer ', '') ||
     null;
@@ -11,18 +11,13 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const isPublicPath = publicPaths.some((path) => pathname.startsWith(path));
-  const isRootPath = pathname === '/';
-
-  if (isRootPath) {
-    return NextResponse.redirect(new URL('/feed', request.url));
-  }
 
   if (!token && !isPublicPath) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
   if (token && isPublicPath) {
-    return NextResponse.redirect(new URL('/feed', request.url));
+    return NextResponse.redirect(new URL('/', request.url));
   }
 
   return NextResponse.next();

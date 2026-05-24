@@ -1,8 +1,72 @@
 'use client';
 
-import Link from 'next/link';
+import { useState, useEffect, useCallback } from 'react';
+import { api } from '@/lib/api';
+import type { Post, Comment } from '@/lib/types';
+import CommentCard from './CommentCard';
+import CommentForm from './CommentForm';
 
-export default function PostCard() {
+interface Props {
+  post: Post;
+}
+
+export default function PostCard({ post }: Props) {
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [showComments, setShowComments] = useState(false);
+  const [loadingComments, setLoadingComments] = useState(false);
+
+  const fetchComments = useCallback(async () => {
+    setLoadingComments(true);
+    try {
+      const res = await api.getComments(post.id);
+      setComments(res.data);
+    } catch {
+      // ignore
+    } finally {
+      setLoadingComments(false);
+    }
+  }, [post.id]);
+
+  useEffect(() => {
+    if (showComments) {
+      fetchComments();
+    }
+  }, [showComments, fetchComments]);
+
+  const handleCommentAdded = (comment: Comment) => {
+    if (!comment.parent_id) {
+      setComments((prev) => [comment, ...prev]);
+    } else {
+      setComments((prev) => addReplyToComment(prev, comment));
+    }
+  };
+
+  const addReplyToComment = (items: Comment[], newReply: Comment): Comment[] => {
+    return items.map((c) => {
+      if (c.id === newReply.parent_id) {
+        return { ...c, replies: [...(c.replies || []), newReply] };
+      }
+      if (c.replies && c.replies.length > 0) {
+        return { ...c, replies: addReplyToComment(c.replies, newReply) };
+      }
+      return c;
+    });
+  };
+
+  const handleCommentDeleted = (commentId: number) => {
+    setComments((prev) => removeComment(prev, commentId));
+  };
+
+  const removeComment = (items: Comment[], id: number): Comment[] => {
+    return items.filter((c) => {
+      if (c.id === id) return false;
+      if (c.replies && c.replies.length > 0) {
+        c.replies = removeComment(c.replies, id);
+      }
+      return true;
+    });
+  };
+
   return (
     <div className="_feed_inner_timeline_post_area _b_radious6 _padd_b24 _padd_t24 _mar_b16">
       <div className="_feed_inner_timeline_content _padd_r24 _padd_l24">
@@ -12,10 +76,12 @@ export default function PostCard() {
               <img src="/assets/images/post_img.png" alt="" className="_post_img" />
             </div>
             <div className="_feed_inner_timeline_post_box_txt">
-              <h4 className="_feed_inner_timeline_post_box_title">Karim Saif</h4>
+              <h4 className="_feed_inner_timeline_post_box_title">
+                {post.user.first_name} {post.user.last_name}
+              </h4>
               <p className="_feed_inner_timeline_post_box_para">
-                5 minute ago .
-                <Link href="#0">Public</Link>
+                {new Date(post.created_at).toLocaleDateString()} .
+                <a href="#0">{post.visibility}</a>
               </p>
             </div>
           </div>
@@ -31,10 +97,12 @@ export default function PostCard() {
             </div>
           </div>
         </div>
-        <h4 className="_feed_inner_timeline_post_title">-Healthy Tracking App</h4>
-        <div className="_feed_inner_timeline_image">
-          <img src="/assets/images/timeline_img.png" alt="" className="_time_img" />
-        </div>
+        <h4 className="_feed_inner_timeline_post_title">{post.content}</h4>
+        {post.image && (
+          <div className="_feed_inner_timeline_image">
+            <img src={post.image} alt="" className="_time_img" />
+          </div>
+        )}
       </div>
       <div className="_feed_inner_timeline_total_reacts _padd_r24 _padd_l24 _mar_b26">
         <div className="_feed_inner_timeline_total_reacts_image">
@@ -46,13 +114,15 @@ export default function PostCard() {
               className={i === 1 ? '_react_img1' : '_react_img'}
             />
           ))}
-          <p className="_feed_inner_timeline_total_reacts_para">9+</p>
+          <p className="_feed_inner_timeline_total_reacts_para">{post.likes_count}+</p>
         </div>
         <div className="_feed_inner_timeline_total_reacts_txt">
           <p className="_feed_inner_timeline_total_reacts_para1">
-            <Link href="#0"><span>12</span> Comment</Link>
+            <a href="#0" onClick={(e) => { e.preventDefault(); setShowComments(!showComments); }}>
+              <span>{post.comments_count}</span> Comment
+            </a>
           </p>
-          <p className="_feed_inner_timeline_total_reacts_para2"><span>122</span> Share</p>
+          <p className="_feed_inner_timeline_total_reacts_para2"><span>0</span> Share</p>
         </div>
       </div>
       <div className="_feed_inner_timeline_reaction">
@@ -69,7 +139,10 @@ export default function PostCard() {
             </span>
           </span>
         </button>
-        <button className="_feed_inner_timeline_reaction_comment _feed_reaction">
+        <button
+          className="_feed_inner_timeline_reaction_comment _feed_reaction"
+          onClick={() => setShowComments(!showComments)}
+        >
           <span className="_feed_inner_timeline_reaction_link">
             <span>
               <svg className="_reaction_svg" xmlns="http://www.w3.org/2000/svg" width="21" height="21" fill="none" viewBox="0 0 21 21">
@@ -91,6 +164,33 @@ export default function PostCard() {
           </span>
         </button>
       </div>
+
+      {showComments && (
+        <div className="_comment_section _padd_r24 _padd_l24 _mar_t16">
+          <CommentForm
+            postId={post.id}
+            onCommentAdded={handleCommentAdded}
+          />
+
+          {loadingComments ? (
+            <p className="_comment_loading">Loading comments...</p>
+          ) : comments.length === 0 ? (
+            <p className="_comment_empty">No comments yet.</p>
+          ) : (
+            <div className="_comment_list">
+              {comments.map((comment) => (
+                <CommentCard
+                  key={comment.id}
+                  comment={comment}
+                  postId={post.id}
+                  onCommentAdded={handleCommentAdded}
+                  onCommentDeleted={handleCommentDeleted}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

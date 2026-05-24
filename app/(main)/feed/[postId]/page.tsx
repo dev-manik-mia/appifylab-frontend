@@ -18,7 +18,7 @@ export default function PostDetailPage({
           <div className="_layout_left_sidebar_wrap">
             <div className="_layout_left_sidebar_inner">
               <div className="_back_btn_area">
-                <Link href="/feed" className="_back_btn_link">
+                <Link href="/" className="_back_btn_link">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                     <path stroke="#666" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M20 12H4m0 0l6-6m-6 6l6 6" />
                   </svg>
