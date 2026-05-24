@@ -17,6 +17,8 @@ export interface Post {
   likes_count: number;
   comments_count: number;
   is_liked: boolean;
+  my_reaction: ReactionType | null;
+  reactions: Reaction[];
   created_at: string;
   updated_at: string;
 }
@@ -31,6 +33,17 @@ export interface Comment {
   replies: Comment[];
   likes_count: number;
   is_liked: boolean;
+  created_at: string;
+}
+
+export type ReactionType = 'like' | 'love' | 'haha' | 'wow' | 'sad' | 'care' | 'angry';
+
+export interface Reaction {
+  id: number;
+  post_id: number;
+  user_id: number;
+  type: ReactionType;
+  user: User;
   created_at: string;
 }
 

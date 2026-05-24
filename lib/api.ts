@@ -1,4 +1,4 @@
-import type { Comment } from '@/lib/types';
+import type { Comment, ReactionType } from '@/lib/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8001/api';
 
@@ -109,8 +109,12 @@ class ApiClient {
     return this.upload<{ success: boolean; data: unknown }>('/posts', formData);
   }
 
-  async likeToggle(data: { likeable_id: number; likeable_type: string }) {
-    return this.post<{ success: boolean; data: unknown }>('/likes/toggle', data);
+  async toggleReaction(postId: number, reactionId: number) {
+    return this.post<{ success: boolean; data: { my_reaction: string | null; reactions: unknown[] } }>(`/posts/${postId}/reactions`, { reaction_id: reactionId });
+  }
+
+  async getReactions(postId: number) {
+    return this.get<{ success: boolean; data: unknown[] }>(`/posts/${postId}/reactions`);
   }
 
   // Comments

@@ -1,8 +1,10 @@
 'use client';
 
-import { use } from 'react';
+import { use, useState, useEffect } from 'react';
 import Link from 'next/link';
 import PostCard from '@/components/PostCard';
+import { api } from '@/lib/api';
+import type { Post } from '@/lib/types';
 
 export default function PostDetailPage({
   params,
@@ -10,6 +12,19 @@ export default function PostDetailPage({
   params: Promise<{ postId: string }>;
 }) {
   const { postId } = use(params);
+  const [post, setPost] = useState<Post | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api.get<{ success: boolean; data: Post }>(`/posts/${postId}`)
+      .then((res) => setPost(res.data))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [postId]);
+
+  if (loading || !post) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="_layout_inner_wrap_area">
@@ -31,7 +46,7 @@ export default function PostDetailPage({
         <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12">
           <div className="_layout_middle_wrap">
             <div className="_layout_middle_inner">
-              <PostCard />
+              <PostCard post={post} />
 
               <div className="_feed_inner_timeline_post_area _b_radious6 _padd_b24 _padd_t24 _mar_b16">
                 <div className="_feed_inner_timeline_content _padd_r24 _padd_l24">
