@@ -1,6 +1,6 @@
-import type { Comment, PaginatedData, ReactionType } from '@/lib/types';
+import type { Comment, PaginatedData } from '@/lib/types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8001/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api';
 
 class ApiClient {
   private readonly baseUrl: string;
