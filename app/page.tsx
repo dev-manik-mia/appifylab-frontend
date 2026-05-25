@@ -1,33 +1,80 @@
 'use client';
 
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { AuthProvider } from '@/app/context/AuthContext';
 import Navbar from '@/components/Navbar';
 import MobileNavigation from '@/components/MobileNavigation';
 import Sidebar from '@/components/Sidebar';
 import PostCard from '@/components/PostCard';
 import PostForm from '@/components/PostForm';
-import type { Post } from '@/lib/types';
+import type { Post, PaginatedData } from '@/lib/types';
 import { api } from '@/lib/api';
-import { useState, useEffect } from 'react';
 
 export default function Home() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async (pageNum: number, append: boolean = false) => {
+    if (pageNum === 1 && !append) {
+      setLoading(true);
+    } else {
+      setLoadingMore(true);
+    }
     try {
-      const res = await api.getPosts();
-      setPosts(res.data as Post[]);
+      const res = await api.getPosts(pageNum);
+      const paginated = res.data as PaginatedData<Post>;
+      if (append) {
+        setPosts((prev) => [...prev, ...paginated.data]);
+      } else {
+        setPosts(paginated.data);
+      }
+      setHasMore(paginated.current_page < paginated.last_page);
     } catch {
       // ignore
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchPosts();
-  }, []);
+    fetchPosts(1);
+  }, [fetchPosts]);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore && !loading) {
+          setPage((prev) => {
+            const next = prev + 1;
+            fetchPosts(next, true);
+            return next;
+          });
+        }
+      },
+      { rootMargin: '200px' }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasMore, loadingMore, loading, fetchPosts]);
+
+  const handlePostCreated = () => {
+    setPage(1);
+    fetchPosts(1);
+  };
+
+  const handlePostDeleted = () => {
+    setPage(1);
+    fetchPosts(1);
+  };
 
   return (
     <AuthProvider>
@@ -93,87 +140,7 @@ export default function Home() {
                       <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12">
                         <div className="_layout_middle_wrap">
                           <div className="_layout_middle_inner">
-                            <div className="_feed_inner_ppl_card _mar_b16">
-                              <div className="_feed_inner_story_arrow">
-                                <button type="button" className="_feed_inner_story_arrow_btn">
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="9" height="8" fill="none" viewBox="0 0 9 8">
-                                    <path fill="#fff" d="M8 4l.366-.341.318.341-.318.341L8 4zm-7 .5a.5.5 0 010-1v1zM5.566.659l2.8 3-.732.682-2.8-3L5.566.66zm2.8 3.682l-2.8 3-.732-.682 2.8-3 .732.682zM8 4.5H1v-1h7v1z" />
-                                  </svg>
-                                </button>
-                              </div>
-                              <div className="row">
-                                <div className="col-xl-3 col-lg-3 col-md-4 col-sm-4 col">
-                                  <div className="_feed_inner_profile_story _b_radious6">
-                                    <div className="_feed_inner_profile_story_image">
-                                      <img src="/assets/images/card_ppl1.png" alt="Image" className="_profile_story_img" />
-                                      <div className="_feed_inner_story_txt">
-                                        <div className="_feed_inner_story_btn">
-                                          <button className="_feed_inner_story_btn_link">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" viewBox="0 0 10 10">
-                                              <path stroke="#fff" strokeLinecap="round" d="M.5 4.884h9M4.884 9.5v-9" />
-                                            </svg>
-                                          </button>
-                                        </div>
-                                        <p className="_feed_inner_story_para">Your Story</p>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                                {[
-                                  { i: 2, cls: 'col' },
-                                  { i: 3, cls: '_custom_mobile_none' },
-                                  { i: 4, cls: '_custom_none' },
-                                ].map(({ i, cls }) => (
-                                  <div className={`col-xl-3 col-lg-3 col-md-4 col-sm-4 ${cls}`} key={i}>
-                                    <div className="_feed_inner_public_story _b_radious6">
-                                      <div className="_feed_inner_public_story_image">
-                                        <img src={`/assets/images/card_ppl${i}.png`} alt="Image" className="_public_story_img" />
-                                        <div className="_feed_inner_pulic_story_txt">
-                                          <p className="_feed_inner_pulic_story_para">Ryan Roslansky</p>
-                                        </div>
-                                        <div className="_feed_inner_public_mini">
-                                          <img src="/assets/images/mini_pic.png" alt="Image" className="_public_mini_img" />
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-
-                            <div className="_feed_inner_ppl_card_mobile _mar_b16">
-                              <div className="_feed_inner_ppl_card_area">
-                                <ul className="_feed_inner_ppl_card_area_list">
-                                  <li className="_feed_inner_ppl_card_area_item">
-                                    <a href="#0" className="_feed_inner_ppl_card_area_link">
-                                      <div className="_feed_inner_ppl_card_area_story">
-                                        <img src="/assets/images/mobile_story_img.png" alt="Image" className="_card_story_img" />
-                                        <div className="_feed_inner_ppl_btn">
-                                          <button className="_feed_inner_ppl_btn_link" type="button">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 12 12">
-                                              <path stroke="#fff" strokeLinecap="round" strokeLinejoin="round" d="M6 2.5v7M2.5 6h7" />
-                                            </svg>
-                                          </button>
-                                        </div>
-                                      </div>
-                                      <p className="_feed_inner_ppl_card_area_link_txt">Your Story</p>
-                                    </a>
-                                  </li>
-                                  {[1, 2, 3, 4, 5, 6, 7].map((i) => (
-                                    <li className="_feed_inner_ppl_card_area_item" key={i}>
-                                      <a href="#0" className="_feed_inner_ppl_card_area_link">
-                                        <div className={i % 2 === 0 ? '_feed_inner_ppl_card_area_story_active' : '_feed_inner_ppl_card_area_story_inactive'}>
-                                          <img src={`/assets/images/mobile_story_img${(i % 3) + 1}.png`} alt="Image" className="_card_story_img1" />
-                                        </div>
-                                        <p className="_feed_inner_ppl_card_area_txt">Ryan...</p>
-                                      </a>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            </div>
-
-                            <PostForm onPostCreated={fetchPosts} />
+                            <PostForm onPostCreated={handlePostCreated} />
 
                             {loading ? (
                               <p>Loading posts...</p>
@@ -181,9 +148,17 @@ export default function Home() {
                               <p>No posts yet.</p>
                             ) : (
                               posts.map((post) => (
-                                <PostCard key={post.id} post={post} />
+                                <PostCard key={post.id} post={post} onPostDeleted={handlePostDeleted} />
                               ))
                             )}
+
+                            {loadingMore && <p style={{ textAlign: 'center', padding: 16 }}>Loading more posts...</p>}
+
+                            {!hasMore && posts.length > 0 && (
+                              <p style={{ textAlign: 'center', padding: 16, color: '#888' }}>You&apos;ve reached the end.</p>
+                            )}
+
+                            <div ref={sentinelRef} style={{ height: 1 }} />
                           </div>
                         </div>
                       </div>
@@ -204,12 +179,12 @@ export default function Home() {
                                 <div className="_right_inner_area_info_ppl" key={person.name}>
                                   <div className="_right_inner_area_info_box">
                                     <div className="_right_inner_area_info_box_image">
-                                      <a href="profile.html">
+                                      <a href="#0">
                                         <img src={`/assets/images/${person.img}`} alt="Image" className="_ppl_img" />
                                       </a>
                                     </div>
                                     <div className="_right_inner_area_info_box_txt">
-                                      <a href="profile.html">
+                                      <a href="#0">
                                         <h4 className="_right_inner_area_info_box_title">{person.name}</h4>
                                       </a>
                                       <p className="_right_inner_area_info_box_para">{person.role}</p>
@@ -229,7 +204,7 @@ export default function Home() {
                                 <div className="_feed_right_inner_area_card_content _mar_b24">
                                   <h4 className="_feed_right_inner_area_card_content_title _title5">Your Friends</h4>
                                   <span className="_feed_right_inner_area_card_content_txt">
-                                    <a className="_feed_right_inner_area_card_content_txt_link" href="find-friends.html">See All</a>
+                                    <a className="_feed_right_inner_area_card_content_txt_link" href="#0">See All</a>
                                   </span>
                                 </div>
                                 <form className="_feed_right_inner_area_card_form">
@@ -242,24 +217,19 @@ export default function Home() {
                               </div>
                               <div className="_feed_bottom_fixed">
                                 {[
-                                  { name: 'Steve Jobs', role: 'CEO of Apple', img: 'people1.png', status: 'inactive', time: '5 minute ago' },
-                                  { name: 'Ryan Roslansky', role: 'CEO of Linkedin', img: 'people2.png', status: 'online' },
-                                  { name: 'Dylan Field', role: 'CEO of Figma', img: 'people3.png', status: 'online' },
-                                  { name: 'Steve Jobs', role: 'CEO of Apple', img: 'people1.png', status: 'inactive', time: '5 minute ago' },
-                                  { name: 'Ryan Roslansky', role: 'CEO of Linkedin', img: 'people2.png', status: 'online' },
-                                  { name: 'Dylan Field', role: 'CEO of Figma', img: 'people3.png', status: 'online' },
-                                  { name: 'Dylan Field', role: 'CEO of Figma', img: 'people3.png', status: 'online' },
-                                  { name: 'Steve Jobs', role: 'CEO of Apple', img: 'people1.png', status: 'inactive', time: '5 minute ago' },
+                                  { name: 'Steve Jobs', role: 'CEO of Apple', img: 'people1.png', status: 'inactive' as const, time: '5 minute ago' },
+                                  { name: 'Ryan Roslansky', role: 'CEO of Linkedin', img: 'people2.png', status: 'online' as const },
+                                  { name: 'Dylan Field', role: 'CEO of Figma', img: 'people3.png', status: 'online' as const },
                                 ].map((person, i) => (
                                   <div className={`_feed_right_inner_area_card_ppl ${person.status === 'inactive' ? '_feed_right_inner_area_card_ppl_inactive' : ''}`} key={i}>
                                     <div className="_feed_right_inner_area_card_ppl_box">
                                       <div className="_feed_right_inner_area_card_ppl_image">
-                                        <a href="profile.html">
+                                        <a href="#0">
                                           <img src={`/assets/images/${person.img}`} alt="" className="_box_ppl_img" />
                                         </a>
                                       </div>
                                       <div className="_feed_right_inner_area_card_ppl_txt">
-                                        <a href="profile.html">
+                                        <a href="#0">
                                           <h4 className="_feed_right_inner_area_card_ppl_title">{person.name}</h4>
                                         </a>
                                         <p className="_feed_right_inner_area_card_ppl_para">{person.role}</p>

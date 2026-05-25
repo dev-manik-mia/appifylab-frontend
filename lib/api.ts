@@ -1,4 +1,4 @@
-import type { Comment, ReactionType } from '@/lib/types';
+import type { Comment, PaginatedData, ReactionType } from '@/lib/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8001/api';
 
@@ -59,6 +59,13 @@ class ApiClient {
     });
   }
 
+  async postForm<T>(endpoint: string, formData: FormData): Promise<T> {
+    return this.request<T>(endpoint, {
+      method: 'POST',
+      body: formData,
+    });
+  }
+
   async put<T>(endpoint: string, data?: unknown): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'PUT',
@@ -95,8 +102,8 @@ class ApiClient {
   }
 
   // Posts
-  async getPosts() {
-    return this.get<{ success: boolean; data: unknown[] }>('/posts');
+  async getPosts(page: number = 1) {
+    return this.get<{ success: boolean; data: PaginatedData<unknown> }>(`/posts?page=${page}`);
   }
 
   async createPost(data: { content: string; visibility: string; image?: File }) {
@@ -128,6 +135,15 @@ class ApiClient {
 
   async deleteComment(commentId: number) {
     return this.delete<{ success: boolean; message: string }>(`/comments/${commentId}`);
+  }
+
+  // Comment Reactions
+  async toggleCommentReaction(commentId: number, reactionId: number) {
+    return this.post<{ success: boolean; data: { is_liked: boolean; reactions: unknown[] } }>(`/comments/${commentId}/reactions`, { reaction_id: reactionId });
+  }
+
+  async getCommentReactions(commentId: number) {
+    return this.get<{ success: boolean; data: unknown[] }>(`/comments/${commentId}/reactions`);
   }
 }
 

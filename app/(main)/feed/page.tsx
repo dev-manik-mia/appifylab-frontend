@@ -1,5 +1,14 @@
-import { redirect } from 'next/navigation';
+'use client';
 
-export default function FeedPage() {
-  redirect('/');
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
+export default function FeedRedirect() {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace('/');
+  }, [router]);
+
+  return null;
 }

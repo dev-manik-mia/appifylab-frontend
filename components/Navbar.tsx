@@ -5,7 +5,7 @@ import { useAuth } from '@/app/context/AuthContext';
 import { useState, useRef, useEffect } from 'react';
 
 export default function Navbar() {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const [showNotify, setShowNotify] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const notifyRef = useRef<HTMLLIElement>(null);
@@ -409,7 +409,7 @@ export default function Navbar() {
               <img src="/assets/images/profile.png" alt="Image" className="_nav_profile_img" />
             </div>
             <div className="_header_nav_dropdown">
-              <p className="_header_nav_para">Dylan Field</p>
+              <p className="_header_nav_para">{user?.first_name || 'User'} {user?.last_name || ''}</p>
               <button id="_profile_drop_show_btn" className="_header_nav_dropdown_btn _dropdown_toggle" type="button" onClick={() => setShowProfile(!showProfile)}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" fill="none" viewBox="0 0 10 6">
                   <path fill="#112032" d="M5 5l.354.354L5 5.707l-.354-.353L5 5zm4.354-3.646l-4 4-.708-.708 4-4 .708.708zm-4.708 4l-4-4 .708-.708 4 4-.708.708z" />
@@ -422,7 +422,7 @@ export default function Navbar() {
                   <img src="/assets/images/profile.png" alt="Image" className="_nav_drop_img" />
                 </div>
                 <div className="_nav_profile_dropdown_info_txt">
-                  <h4 className="_nav_dropdown_title">Dylan Field</h4>
+                  <h4 className="_nav_dropdown_title">{user?.first_name || 'User'} {user?.last_name || ''}</h4>
                   <Link href="/profile" className="_nav_drop_profile">
                     View Profile
                   </Link>

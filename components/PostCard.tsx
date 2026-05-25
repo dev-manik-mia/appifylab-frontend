@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { api } from '@/lib/api';
 import type { Post, Comment, Reaction, ReactionType } from '@/lib/types';
+import { useAuth } from '@/app/context/AuthContext';
 import CommentCard from './CommentCard';
 
 const REACTION_IDS: Record<ReactionType, number> = {
@@ -17,9 +18,11 @@ const REACTION_IDS: Record<ReactionType, number> = {
 
 interface Props {
   post: Post;
+  onPostDeleted?: () => void;
 }
 
-export default function PostCard({ post }: Props) {
+export default function PostCard({ post, onPostDeleted }: Props) {
+  const { user } = useAuth();
   const [comments, setComments] = useState<Comment[]>([]);
   const [showComments, setShowComments] = useState(false);
   const [loadingComments, setLoadingComments] = useState(false);
@@ -31,6 +34,9 @@ export default function PostCard({ post }: Props) {
   const [showReactionPicker, setShowReactionPicker] = useState(false);
   const reactionPickerRef = useRef<HTMLDivElement>(null);
   const hidePickerTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [showReactionsModal, setShowReactionsModal] = useState(false);
+
+  const isOwner = user?.id === post.user_id;
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -59,6 +65,16 @@ export default function PostCard({ post }: Props) {
       fetchComments();
     }
   }, [showComments, fetchComments]);
+
+  const handleDeletePost = async () => {
+    if (!confirm('Delete this post?')) return;
+    try {
+      await api.delete(`/posts/${post.id}`);
+      onPostDeleted?.();
+    } catch {
+      // ignore
+    }
+  };
 
   const handleCommentAdded = (comment: Comment) => {
     if (!comment.parent_id) {
@@ -113,7 +129,7 @@ export default function PostCard({ post }: Props) {
     }
     try {
       const res = await api.toggleReaction(post.id, REACTION_IDS[type]);
-      setMyReaction(res.data.my_reaction);
+      setMyReaction(res.data.my_reaction as ReactionType | null);
       setReactions(res.data.reactions as Reaction[]);
     } catch {
       setMyReaction(prev);
@@ -145,7 +161,7 @@ export default function PostCard({ post }: Props) {
               </h4>
               <p className="_feed_inner_timeline_post_box_para">
                 {new Date(post.created_at).toLocaleDateString()} .
-                <a href="#0">{post.visibility}</a>
+                <a href="#0">{post.visibility === 'private' ? 'Private' : 'Public'}</a>
               </p>
             </div>
           </div>
@@ -176,47 +192,18 @@ export default function PostCard({ post }: Props) {
                       Save Post
                     </a>
                   </li>
-                  <li className="_feed_timeline_dropdown_item">
-                    <a href="#0" className="_feed_timeline_dropdown_link">
-                      <span>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="22" fill="none" viewBox="0 0 20 22">
-                          <path fill="#377DFF" fillRule="evenodd" d="M7.547 19.55c.533.59 1.218.915 1.93.915.714 0 1.403-.324 1.938-.916a.777.777 0 011.09-.056c.318.284.344.77.058 1.084-.832.917-1.927 1.423-3.086 1.423h-.002c-1.155-.001-2.248-.506-3.077-1.424a.762.762 0 01.057-1.083.774.774 0 011.092.057zM9.527 0c4.58 0 7.657 3.543 7.657 6.85 0 1.702.436 2.424.899 3.19.457.754.976 1.612.976 3.233-.36 4.14-4.713 4.478-9.531 4.478-4.818 0-9.172-.337-9.528-4.413-.003-1.686.515-2.544.973-3.299l.161-.27c.398-.679.737-1.417.737-2.918C1.871 3.543 4.948 0 9.528 0zm0 1.535c-3.6 0-6.11 2.802-6.11 5.316 0 2.127-.595 3.11-1.12 3.978-.422.697-.755 1.247-.755 2.444.173 1.93 1.455 2.944 7.986 2.944 6.494 0 7.817-1.06 7.988-3.01-.003-1.13-.336-1.681-.757-2.378-.526-.868-1.12-1.851-1.12-3.978 0-2.514-2.51-5.316-6.111-5.316z" clipRule="evenodd" />
-                        </svg>
-                      </span>
-                      Turn On Notification
-                    </a>
-                  </li>
-                  <li className="_feed_timeline_dropdown_item">
-                    <a href="#0" className="_feed_timeline_dropdown_link">
-                      <span>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 18 18">
-                          <path stroke="#1890FF" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.2" d="M14.25 2.25H3.75a1.5 1.5 0 00-1.5 1.5v10.5a1.5 1.5 0 001.5 1.5h10.5a1.5 1.5 0 001.5-1.5V3.75a1.5 1.5 0 00-1.5-1.5zM6.75 6.75l4.5 4.5M11.25 6.75l-4.5 4.5" />
-                        </svg>
-                      </span>
-                      Hide
-                    </a>
-                  </li>
-                  <li className="_feed_timeline_dropdown_item">
-                    <a href="#0" className="_feed_timeline_dropdown_link">
-                      <span>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 18 18">
-                          <path stroke="#1890FF" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.2" d="M8.25 3H3a1.5 1.5 0 00-1.5 1.5V15A1.5 1.5 0 003 16.5h10.5A1.5 1.5 0 0015 15V9.75" />
-                          <path stroke="#1890FF" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.2" d="M13.875 1.875a1.591 1.591 0 112.25 2.25L9 11.25 6 12l.75-3 7.125-7.125z" />
-                        </svg>
-                      </span>
-                      Edit Post
-                    </a>
-                  </li>
-                  <li className="_feed_timeline_dropdown_item">
-                    <a href="#0" className="_feed_timeline_dropdown_link">
-                      <span>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 18 18">
-                          <path stroke="#1890FF" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.2" d="M2.25 4.5h13.5M6 4.5V3a1.5 1.5 0 011.5-1.5h3A1.5 1.5 0 0112 3v1.5m2.25 0V15a1.5 1.5 0 01-1.5 1.5h-7.5a1.5 1.5 0 01-1.5-1.5V4.5h10.5zM7.5 8.25v4.5M10.5 8.25v4.5" />
-                        </svg>
-                      </span>
-                      Delete Post
-                    </a>
-                  </li>
+                  {isOwner && (
+                    <li className="_feed_timeline_dropdown_item">
+                      <a href="#0" className="_feed_timeline_dropdown_link" onClick={handleDeletePost}>
+                        <span>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 18 18">
+                            <path stroke="#1890FF" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.2" d="M2.25 4.5h13.5M6 4.5V3a1.5 1.5 0 011.5-1.5h3A1.5 1.5 0 0112 3v1.5m2.25 0V15a1.5 1.5 0 01-1.5 1.5h-7.5a1.5 1.5 0 01-1.5-1.5V4.5h10.5zM7.5 8.25v4.5M10.5 8.25v4.5" />
+                          </svg>
+                        </span>
+                        Delete Post
+                      </a>
+                    </li>
+                  )}
                 </ul>
               </div>
             )}
@@ -224,32 +211,25 @@ export default function PostCard({ post }: Props) {
         </div>
         <h4 className="_feed_inner_timeline_post_title">{post.content}</h4>
         {post.image && (
-          <div className="_feed_inner_timeline_image">
-            <img src={post.image} alt="" className="_time_img" />
+          <div className="_feed_inner_timeline_image" style={{ marginBottom: 16 }}>
+            <img src={post.image} alt="" className="_time_img" style={{ maxHeight: 400, objectFit: 'cover', borderRadius: 8 }} />
           </div>
         )}
       </div>
       <div className="_feed_inner_timeline_total_reacts _padd_r24 _padd_l24 _mar_b26">
         <div className="_feed_inner_timeline_total_reacts_image">
-          {reactions.slice(0, 5).map((r, i) => (
-            <img
-              key={r.id}
-              src={`/assets/images/react_img${(i % 5) + 1}.png`}
-              alt=""
-              className={i === 0 ? '_react_img1' : `_react_img ${i > 1 ? '_rect_img_mbl_none' : ''}`}
-            />
-          ))}
           {reactions.length > 0 && (
-            <p className="_feed_inner_timeline_total_reacts_para">{reactions.length > 5 ? `${reactions.length}+` : `${reactions.length}`}</p>
+            <p className="_feed_inner_timeline_total_reacts_para" style={{ cursor: 'pointer' }} onClick={() => setShowReactionsModal(true)}>
+              {reactions.length} reaction{reactions.length !== 1 ? 's' : ''}
+            </p>
           )}
         </div>
         <div className="_feed_inner_timeline_total_reacts_txt">
           <p className="_feed_inner_timeline_total_reacts_para1">
             <a href="#0" onClick={(e) => { e.preventDefault(); setShowComments(!showComments); }}>
-              <span>{post.comments_count}</span> Comment
+              <span>{post.comments_count}</span> Comment{post.comments_count !== 1 ? 's' : ''}
             </a>
           </p>
-          <p className="_feed_inner_timeline_total_reacts_para2"><span>0</span> Share</p>
         </div>
       </div>
       <div className="_feed_inner_timeline_reaction" onMouseLeave={hidePicker}>
@@ -368,6 +348,7 @@ export default function PostCard({ post }: Props) {
           )}
         </>
       )}
+
       <style>{`
         ._feed_reaction_picker {
           position: absolute;
@@ -415,6 +396,60 @@ export default function PostCard({ post }: Props) {
           height: 28px;
         }
       `}</style>
+
+      {showReactionsModal && (
+        <div className="_modal_overlay" onClick={() => setShowReactionsModal(false)}>
+          <div className="_modal_content" onClick={(e) => e.stopPropagation()}>
+            <div className="_modal_header">
+              <h4>Reactions ({reactions.length})</h4>
+              <button className="_modal_close" onClick={() => setShowReactionsModal(false)}>&times;</button>
+            </div>
+            <div className="_modal_body">
+              {reactions.length === 0 ? (
+                <p>No reactions yet.</p>
+              ) : (
+                reactions.map((r) => (
+                  <div className="_reaction_item" key={r.id}>
+                    <div className="_reaction_item_user">
+                      <img src="/assets/images/post_img.png" alt="" className="_reaction_user_img" />
+                      <span>{r.user.first_name} {r.user.last_name}</span>
+                    </div>
+                    <ReactionIcon type={r.type as ReactionType} />
+                  </div>
+                ))
+              )}
+            </div>
+            <style>{`
+              ._modal_overlay {
+                position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0,0,0,0.5); z-index: 1000;
+                display: flex; align-items: center; justify-content: center;
+              }
+              ._modal_content {
+                background: #fff; border-radius: 12px; width: 90%; max-width: 400px;
+                max-height: 80vh; overflow-y: auto;
+              }
+              ._modal_header {
+                display: flex; justify-content: space-between; align-items: center;
+                padding: 16px 20px; border-bottom: 1px solid #eee;
+              }
+              ._modal_header h4 { margin: 0; font-size: 16px; font-weight: 600; }
+              ._modal_close {
+                background: none; border: none; font-size: 24px; cursor: pointer; color: #666;
+              }
+              ._modal_body { padding: 12px 20px; }
+              ._reaction_item {
+                display: flex; justify-content: space-between; align-items: center;
+                padding: 8px 0; border-bottom: 1px solid #f5f5f5;
+              }
+              ._reaction_item:last-child { border-bottom: none; }
+              ._reaction_item_user { display: flex; align-items: center; gap: 10px; }
+              ._reaction_user_img { width: 36px; height: 36px; border-radius: 50%; }
+              ._reaction_item svg { width: 24px; height: 24px; }
+            `}</style>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
