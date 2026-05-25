@@ -5,6 +5,7 @@ import { api } from '@/lib/api';
 import type { Post, Comment, Reaction, ReactionType } from '@/lib/types';
 import { useAuth } from '@/app/context/AuthContext';
 import CommentCard from './CommentCard';
+import ReactionAvatars from './ReactionAvatars';
 
 const REACTION_IDS: Record<ReactionType, number> = {
   like: 1,
@@ -29,12 +30,14 @@ export default function PostCard({ post, onPostDeleted }: Props) {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [commentText, setCommentText] = useState('');
+  const [commentsCount, setCommentsCount] = useState(post.comments_count);
   const [reactions, setReactions] = useState<Reaction[]>(post.reactions || []);
   const [myReaction, setMyReaction] = useState<ReactionType | null>(post.my_reaction || null);
   const [showReactionPicker, setShowReactionPicker] = useState(false);
   const reactionPickerRef = useRef<HTMLDivElement>(null);
   const hidePickerTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [showReactionsModal, setShowReactionsModal] = useState(false);
+  const [showAllComments, setShowAllComments] = useState(false);
 
   const isOwner = user?.id === post.user_id;
 
@@ -53,6 +56,7 @@ export default function PostCard({ post, onPostDeleted }: Props) {
     try {
       const res = await api.getComments(post.id);
       setComments(res.data);
+      setShowAllComments(false);
     } catch {
       // ignore
     } finally {
@@ -79,6 +83,7 @@ export default function PostCard({ post, onPostDeleted }: Props) {
   const handleCommentAdded = (comment: Comment) => {
     if (!comment.parent_id) {
       setComments((prev) => [comment, ...prev]);
+      setCommentsCount((prev) => prev + 1);
     } else {
       setComments((prev) => addReplyToComment(prev, comment));
     }
@@ -96,8 +101,11 @@ export default function PostCard({ post, onPostDeleted }: Props) {
     });
   };
 
-  const handleCommentDeleted = (commentId: number) => {
+  const handleCommentDeleted = (commentId: number, parentId: number | null) => {
     setComments((prev) => removeComment(prev, commentId));
+    if (!parentId) {
+      setCommentsCount((prev) => Math.max(0, prev - 1));
+    }
   };
 
   const removeComment = (items: Comment[], id: number): Comment[] => {
@@ -217,17 +225,11 @@ export default function PostCard({ post, onPostDeleted }: Props) {
         )}
       </div>
       <div className="_feed_inner_timeline_total_reacts _padd_r24 _padd_l24 _mar_b26">
-        <div className="_feed_inner_timeline_total_reacts_image">
-          {reactions.length > 0 && (
-            <p className="_feed_inner_timeline_total_reacts_para" style={{ cursor: 'pointer' }} onClick={() => setShowReactionsModal(true)}>
-              {reactions.length} reaction{reactions.length !== 1 ? 's' : ''}
-            </p>
-          )}
-        </div>
+        <ReactionAvatars reactions={reactions} onClick={() => setShowReactionsModal(true)} />
         <div className="_feed_inner_timeline_total_reacts_txt">
           <p className="_feed_inner_timeline_total_reacts_para1">
             <a href="#0" onClick={(e) => { e.preventDefault(); setShowComments(!showComments); }}>
-              <span>{post.comments_count}</span> Comment{post.comments_count !== 1 ? 's' : ''}
+              <span>{commentsCount}</span> Comment{commentsCount !== 1 ? 's' : ''}
             </a>
           </p>
         </div>
@@ -237,20 +239,12 @@ export default function PostCard({ post, onPostDeleted }: Props) {
           <button
             className={`_feed_inner_timeline_reaction_emoji _feed_reaction ${myReaction ? '_feed_reaction_active' : ''}`}
             onMouseEnter={showPicker}
+            onClick={() => { if (!myReaction) handleReaction('like'); }}
             style={{ flex: 1 }}
           >
             <span className="_feed_inner_timeline_reaction_link">
               <span>
-                {myReaction ? (
-                  <ReactionIcon type={myReaction} />
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="none" viewBox="0 0 19 19">
-                    <path fill="#FFCC4D" d="M9.5 19a9.5 9.5 0 100-19 9.5 9.5 0 000 19z" />
-                    <path fill="#664500" d="M9.5 11.083c-1.912 0-3.181-.222-4.75-.527-.358-.07-1.056 0-1.056 1.055 0 2.111 2.425 4.75 5.806 4.75 3.38 0 5.805-2.639 5.805-4.75 0-1.055-.697-1.125-1.055-1.055-1.57.305-2.838.527-4.75.527z" />
-                    <path fill="#fff" d="M4.75 11.611s1.583.528 4.75.528 4.75-.528 4.75-.528-1.056 2.111-4.75 2.111-4.75-2.11-4.75-2.11z" />
-                    <path fill="#664500" d="M6.333 8.972c.729 0 1.32-.827 1.32-1.847s-.591-1.847-1.32-1.847c-.729 0-1.32.827-1.32 1.847s.591 1.847 1.32 1.847zM12.667 8.972c.729 0 1.32-.827 1.32-1.847s-.591-1.847-1.32-1.847c-.729 0-1.32.827-1.32 1.847s.591 1.847 1.32 1.847z" />
-                  </svg>
-                )}
+                {myReaction && <ReactionIcon type={myReaction} />}
                 {myReaction ? myReaction.charAt(0).toUpperCase() + myReaction.slice(1) : 'Like'}
               </span>
             </span>
@@ -310,6 +304,12 @@ export default function PostCard({ post, onPostDeleted }: Props) {
                       placeholder="Write a comment"
                       value={commentText}
                       onChange={(e) => setCommentText(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          handleQuickComment();
+                        }
+                      }}
                     />
                   </div>
                 </div>
@@ -335,7 +335,18 @@ export default function PostCard({ post, onPostDeleted }: Props) {
             <p className="_comment_empty">No comments yet.</p>
           ) : (
             <div className="_timline_comment_main">
-              {comments.map((comment) => (
+              {comments.length > 1 && !showAllComments && (
+                <div className="_previous_comment">
+                  <button
+                    type="button"
+                    className="_previous_comment_txt"
+                    onClick={() => setShowAllComments(true)}
+                  >
+                    View {comments.length - 1} previous {comments.length - 1 === 1 ? 'comment' : 'comments'}
+                  </button>
+                </div>
+              )}
+              {(showAllComments ? comments : [comments[0]]).map((comment) => (
                 <CommentCard
                   key={comment.id}
                   comment={comment}

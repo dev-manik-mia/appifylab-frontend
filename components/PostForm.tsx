@@ -9,7 +9,6 @@ interface Props {
 
 export default function PostForm({ onPostCreated }: Props) {
   const [content, setContent] = useState('');
-  const [visibility, setVisibility] = useState<'public' | 'private'>('public');
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -37,9 +36,8 @@ export default function PostForm({ onPostCreated }: Props) {
 
     setLoading(true);
     try {
-      await api.createPost({ content: content.trim(), visibility, image: image || undefined });
+      await api.createPost({ content: content.trim(), visibility: 'public', image: image || undefined });
       setContent('');
-      setVisibility('public');
       setImage(null);
       setImagePreview(null);
       onPostCreated?.();
@@ -74,22 +72,6 @@ export default function PostForm({ onPostCreated }: Props) {
           </div>
         </div>
 
-        <div className="_feed_inner_text_area_visibility _mar_b16">
-          <label className="_feed_visibility_label">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
-              <path fill="#666" d="M8 3C4.5 3 1.5 5.5 0 8c1.5 2.5 4.5 5 8 5s6.5-2.5 8-5c-1.5-2.5-4.5-5-8-5zm0 8.5c-1.93 0-3.5-1.57-3.5-3.5S6.07 4.5 8 4.5s3.5 1.57 3.5 3.5S9.93 11.5 8 11.5zM8 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
-            </svg>
-            <select
-              value={visibility}
-              onChange={(e) => setVisibility(e.target.value as 'public' | 'private')}
-              className="_feed_visibility_select"
-              disabled={loading}
-            >
-              <option value="public">Public</option>
-              <option value="private">Private</option>
-            </select>
-          </label>
-        </div>
 
         {imagePreview && (
           <div className="_feed_image_preview _mar_b16" style={{ position: 'relative', display: 'inline-block' }}>
