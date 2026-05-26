@@ -42,6 +42,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchPosts(1);
   }, [fetchPosts]);
 
@@ -52,7 +53,8 @@ export default function Home() {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !loadingMore && !loading) {
-          setPage((prev) => {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
+      setPage((prev) => {
             const next = prev + 1;
             fetchPosts(next, true);
             return next;

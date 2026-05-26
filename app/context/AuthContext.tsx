@@ -35,6 +35,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const storedToken = localStorage.getItem('token');
+    if (storedToken) {
+      setToken(storedToken); // eslint-disable-line react-hooks/set-state-in-effect
+    } else {
+      setLoading(false);
+    }
+  }, []);
+
   const fetchUser = useCallback(async () => {
     try {
       const res = await api.me();
@@ -44,18 +53,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
       localStorage.removeItem('token');
       removeCookie('token');
+    } finally {
+      setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    if (storedToken) {
-      setToken(storedToken);
-      fetchUser().finally(() => setLoading(false));
-    } else {
-      setLoading(false);
+    if (token) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      fetchUser();
     }
-  }, [fetchUser]);
+  }, [token, fetchUser]);
 
   const login = async (email: string, password: string) => {
     const res = await api.login(email, password);
@@ -69,12 +77,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = async (firstName: string, lastName: string, email: string, password: string) => {
     const res = await api.register({ first_name: firstName, last_name: lastName, email, password });
-    const { token: newToken, user: newUser } = res.data as { token: string; user: User };
-    localStorage.setItem('token', newToken);
-    setCookie('token', newToken);
-    setToken(newToken);
-    setUser(newUser);
-    window.location.href = '/';
+    const data = res.data as { token?: string; user: User };
+    if (data.token) {
+      localStorage.setItem('token', data.token);
+      setCookie('token', data.token);
+      setToken(data.token);
+      setUser(data.user);
+      window.location.href = '/';
+    } else {
+      await login(email, password);
+    }
   };
 
   const logout = async () => {

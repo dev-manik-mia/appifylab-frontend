@@ -1,12 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useAuth } from '@/app/context/AuthContext';
 
 export default function LoginPage() {
-  const router = useRouter();
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -14,7 +12,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent | React.KeyboardEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
@@ -64,7 +62,7 @@ export default function LoginPage() {
                 <div className="_social_login_content_bottom_txt _mar_b24"> <span>Or</span>
                 </div>
                 {error && <div className="alert alert-danger">{error}</div>}
-                <form className="_social_login_form" onSubmit={handleSubmit}>
+                <div className="_social_login_form">
                   <div className="row">
                     <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                       <div className="_social_login_form_input _mar_b14">
@@ -74,6 +72,7 @@ export default function LoginPage() {
                           className="form-control _social_login_input"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === 'Enter') handleSubmit(e as unknown as React.FormEvent); }}
                           required
                         />
                       </div>
@@ -86,6 +85,7 @@ export default function LoginPage() {
                           className="form-control _social_login_input"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === 'Enter') handleSubmit(e as unknown as React.FormEvent); }}
                           required
                         />
                       </div>
@@ -112,13 +112,13 @@ export default function LoginPage() {
                   <div className="row">
                     <div className="col-lg-12 col-md-12 col-xl-12 col-sm-12">
                       <div className="_social_login_form_btn _mar_t24 _mar_b32">
-                        <button type="submit" className="_social_login_form_btn_link _btn1" disabled={loading}>
+                        <button type="button" className="_social_login_form_btn_link _btn1" disabled={loading} onClick={handleSubmit}>
                           {loading ? 'Logging in...' : 'Login now'}
                         </button>
                       </div>
                     </div>
                   </div>
-                </form>
+                </div>
                 <div className="row">
                   <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                     <div className="_social_login_bottom_txt">

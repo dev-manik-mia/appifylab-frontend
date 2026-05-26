@@ -1,12 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useAuth } from '@/app/context/AuthContext';
 
 export default function RegisterPage() {
-  const router = useRouter();
   const { register } = useAuth();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -17,7 +15,7 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent | React.KeyboardEvent) => {
     e.preventDefault();
     setError('');
 
@@ -83,7 +81,7 @@ export default function RegisterPage() {
                 <div className="_social_registration_content_bottom_txt _mar_b24"> <span>Or</span>
                 </div>
                 {error && <div className="alert alert-danger">{error}</div>}
-                <form className="_social_registration_form" onSubmit={handleSubmit}>
+                <div className="_social_registration_form">
                   <div className="row">
                     <div className="col-xl-6 col-lg-6 col-md-6 col-sm-12">
                       <div className="_social_registration_form_input _mar_b14">
@@ -93,6 +91,7 @@ export default function RegisterPage() {
                           className="form-control _social_registration_input"
                           value={firstName}
                           onChange={(e) => setFirstName(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === 'Enter') handleSubmit(e as unknown as React.FormEvent); }}
                           required
                         />
                       </div>
@@ -105,6 +104,7 @@ export default function RegisterPage() {
                           className="form-control _social_registration_input"
                           value={lastName}
                           onChange={(e) => setLastName(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === 'Enter') handleSubmit(e as unknown as React.FormEvent); }}
                           required
                         />
                       </div>
@@ -117,6 +117,7 @@ export default function RegisterPage() {
                           className="form-control _social_registration_input"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === 'Enter') handleSubmit(e as unknown as React.FormEvent); }}
                           required
                         />
                       </div>
@@ -129,6 +130,7 @@ export default function RegisterPage() {
                           className="form-control _social_registration_input"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === 'Enter') handleSubmit(e as unknown as React.FormEvent); }}
                           required
                         />
                       </div>
@@ -141,6 +143,7 @@ export default function RegisterPage() {
                           className="form-control _social_registration_input"
                           value={repeatPassword}
                           onChange={(e) => setRepeatPassword(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === 'Enter') handleSubmit(e as unknown as React.FormEvent); }}
                           required
                         />
                       </div>
@@ -162,13 +165,13 @@ export default function RegisterPage() {
                   <div className="row">
                     <div className="col-lg-12 col-md-12 col-xl-12 col-sm-12">
                       <div className="_social_registration_form_btn _mar_t24 _mar_b32">
-                        <button type="submit" className="_social_registration_form_btn_link _btn1" disabled={loading}>
+                        <button type="button" className="_social_registration_form_btn_link _btn1" disabled={loading} onClick={handleSubmit}>
                           {loading ? 'Registering...' : 'Register now'}
                         </button>
                       </div>
                     </div>
                   </div>
-                </form>
+                </div>
                 <div className="row">
                   <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                     <div className="_social_registration_bottom_txt">
