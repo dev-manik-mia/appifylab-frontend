@@ -207,7 +207,7 @@ export default function CommentCard({ comment, postId, depth = 1, onCommentAdded
         )}
 
         {depth === 1 && comment.replies && comment.replies.length > 0 && (
-          <div className="_comment_replies" style={{ paddingLeft: 48 }}>
+          <div className="_comment_replies" style={{ paddingLeft: 48, marginTop: 10 }}>
             {comment.replies.map((reply) => (
               <CommentCard
                 key={reply.id}
