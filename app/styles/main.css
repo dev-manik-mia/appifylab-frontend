@@ -5586,6 +5586,11 @@
     -webkit-transition:.2s all ease;
     -o-transition:.2s all ease;
     transition:.2s all ease;
+    background: none;
+    border: none;
+    width: 100%;
+    padding: 0;
+    cursor: pointer;
 }
 ._nav_dropdown_link:hover {
     color:var(--color5);

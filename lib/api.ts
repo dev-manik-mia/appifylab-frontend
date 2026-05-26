@@ -105,6 +105,10 @@ class ApiClient {
     return this.get<{ success: boolean; data: unknown }>('/me');
   }
 
+  async refresh() {
+    return this.post<{ success: boolean; data: { token: string } }>('/refresh');
+  }
+
   // Posts
   async getPosts(page: number = 1) {
     return this.get<{ success: boolean; data: PaginatedData<unknown> }>(`/posts?page=${page}`);

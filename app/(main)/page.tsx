@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import PostCard from '@/components/PostCard';
 import PostForm from '@/components/PostForm';
+import Stories from '@/components/Stories';
 import type { Post, PaginatedData } from '@/lib/types';
 import { api } from '@/lib/api';
 
@@ -76,6 +77,7 @@ export default function HomeFeed() {
   return (
     <div className="_layout_middle_wrap">
       <div className="_layout_middle_inner">
+        <Stories />
         <PostForm onPostCreated={handlePostCreated} />
 
         {loading ? (

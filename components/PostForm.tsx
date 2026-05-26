@@ -11,6 +11,7 @@ export default function PostForm({ onPostCreated }: Props) {
   const [content, setContent] = useState('');
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [visibility, setVisibility] = useState<'public' | 'private'>('public');
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -36,7 +37,7 @@ export default function PostForm({ onPostCreated }: Props) {
 
     setLoading(true);
     try {
-      await api.createPost({ content: content.trim(), visibility: 'public', image: image || undefined });
+      await api.createPost({ content: content.trim(), visibility, image: image || undefined });
       setContent('');
       setImage(null);
       setImagePreview(null);
@@ -51,7 +52,7 @@ export default function PostForm({ onPostCreated }: Props) {
   return (
     <div className="_feed_inner_text_area _b_radious6 _padd_b24 _padd_t24 _padd_r24 _padd_l24 _mar_b16">
       <form onSubmit={handleSubmit}>
-        <div className="_feed_inner_text_area_box">
+        <div className="_feed_inner_text_area_box" style={{ position: 'relative' }}>
           <div className="_feed_inner_text_area_box_image">
             <img src="/assets/images/txt_img.png" alt="User avatar" className="_txt_img" />
           </div>
@@ -70,6 +71,28 @@ export default function PostForm({ onPostCreated }: Props) {
               </svg>
             </label>
           </div>
+          <select
+            value={visibility}
+            onChange={(e) => setVisibility(e.target.value as 'public' | 'private')}
+            style={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              border: '1px solid #377DFF',
+              borderRadius: 6,
+              padding: '3px 8px',
+              fontSize: 12,
+              fontWeight: 600,
+              color: '#fff',
+              background: '#377DFF',
+              cursor: 'pointer',
+              outline: 'none',
+              zIndex: 2,
+            }}
+          >
+            <option value="public" style={{ color: '#112032', background: '#fff' }}>Public</option>
+            <option value="private" style={{ color: '#112032', background: '#fff' }}>Private</option>
+          </select>
         </div>
 
 

@@ -49,7 +49,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await api.me();
       setUser(res.data as User);
     } catch (err) {
-      console.error('Failed to fetch user:', err);
+      const httpStatus = (err as { status?: number }).status;
+      if (httpStatus === 401) {
+        try {
+          const refreshRes = await api.refresh();
+          const data = refreshRes.data as { token: string };
+          localStorage.setItem('token', data.token);
+          setCookie('token', data.token);
+          setToken(data.token);
+          return;
+        } catch {
+          // refresh failed, proceed to logout
+        }
+      }
       setToken(null);
       setUser(null);
       localStorage.removeItem('token');

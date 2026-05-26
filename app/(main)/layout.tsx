@@ -5,17 +5,35 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import MobileNavigation from '@/components/MobileNavigation';
 import Sidebar from '@/components/Sidebar';
+import { useState, useEffect } from 'react';
 
 export default function MainLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const [darkMode, setDarkMode] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('darkMode');
+    if (stored === 'true') {
+      setDarkMode(true);
+    }
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted) {
+      localStorage.setItem('darkMode', darkMode ? 'true' : 'false');
+    }
+  }, [darkMode, mounted]);
+
   return (
     <AuthProvider>
-      <div className="_layout _layout_main_wrapper">
+      <div className={`_layout _layout_main_wrapper${darkMode ? ' _dark_wrapper' : ''}`}>
         <div className="_layout_mode_swithing_btn">
-          <button type="button" className="_layout_swithing_btn_link">
+          <button type="button" className="_layout_swithing_btn_link" onClick={() => setDarkMode((prev) => !prev)}>
             <div className="_layout_swithing_btn">
               <div className="_layout_swithing_btn_round"></div>
             </div>
