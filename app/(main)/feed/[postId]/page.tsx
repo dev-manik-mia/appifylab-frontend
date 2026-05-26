@@ -2,6 +2,7 @@
 
 import { use, useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import PostCard from '@/components/PostCard';
 import { api } from '@/lib/api';
 import type { Post } from '@/lib/types';
@@ -55,7 +56,7 @@ export default function PostDetailPage({
                   <div className="_feed_comment_input_area _mar_b20">
                     <div className="_feed_comment_input_box">
                       <div className="_feed_comment_input_image">
-                        <img src="/assets/images/post_img.png" alt="User" className="_comment_user_img" />
+                        <Image src="/assets/images/post_img.png" alt="User" className="_comment_user_img" width={88} height={88} />
                       </div>
                       <div className="_feed_comment_input_form">
                         <input type="text" className="form-control _feed_comment_input" placeholder="Write a comment..." />
@@ -67,7 +68,7 @@ export default function PostDetailPage({
                     <div className="_feed_comment_item _mar_b16" key={i}>
                       <div className="_feed_comment_item_box">
                         <div className="_feed_comment_item_image">
-                          <img src="/assets/images/post_img.png" alt="User" className="_comment_item_img" />
+                          <Image src="/assets/images/post_img.png" alt="User" className="_comment_item_img" width={88} height={88} />
                         </div>
                         <div className="_feed_comment_item_txt">
                           <div className="_feed_comment_item_top">

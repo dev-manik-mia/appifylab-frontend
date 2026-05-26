@@ -186,7 +186,7 @@
 
 /*------Login Css --------*/
 ._social_login_wrapper {
-    padding: 100px 0px;
+    padding: 60px 0px;
     background: var(--bg1);
     position: relative;
     z-index: 1;
@@ -214,11 +214,11 @@
     margin:0 auto;
 }
 ._left_img {
-    max-width: 633px;
+    max-width: 450px;
 }
 ._social_login_content {
     background: var(--bg2);
-    padding: 48px;
+    padding: 32px;
     border-radius: 6px;
 }
 ._social_login_content_para {
@@ -375,14 +375,14 @@
     margin:0 auto;
 }
 ._social_registration_wrapper {
-    padding: 100px 0px;
+    padding: 60px 0px;
     background: var(--bg1);
     position: relative;
     z-index: 1;
 }
 ._social_registration_content {
     background: var(--bg2);
-    padding: 48px;
+    padding: 32px;
     border-radius: 6px;
 }
 ._social_registration_content_para {
