@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useAuth } from '@/app/context/AuthContext';
 import { useState, useRef, useEffect } from 'react';
+import Avatar from './Avatar';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -406,7 +407,14 @@ export default function Navbar() {
           </ul>
           <div className="_header_nav_profile" ref={profileRef}>
             <div className="_header_nav_profile_image">
-              <img src="/assets/images/profile.png" alt="Profile" className="_nav_profile_img" />
+              <Avatar
+                profile_image={user?.profile_image || null}
+                first_name={user?.first_name}
+                last_name={user?.last_name}
+                size={44}
+                className="_nav_profile_img"
+                alt="Profile"
+              />
             </div>
             <div className="_header_nav_dropdown">
               <p className="_header_nav_para">{user?.first_name || 'User'} {user?.last_name || ''}</p>
@@ -419,7 +427,14 @@ export default function Navbar() {
             <div id="_prfoile_drop" className={showProfile ? '_nav_profile_dropdown _profile_dropdown show' : '_nav_profile_dropdown _profile_dropdown'}>
               <div className="_nav_profile_dropdown_info">
                 <div className="_nav_profile_dropdown_image">
-                  <img src="/assets/images/profile.png" alt="Profile" className="_nav_drop_img" />
+                  <Avatar
+                    profile_image={user?.profile_image || null}
+                    first_name={user?.first_name}
+                    last_name={user?.last_name}
+                    size={44}
+                    className="_nav_drop_img"
+                    alt="Profile"
+                  />
                 </div>
                 <div className="_nav_profile_dropdown_info_txt">
                   <h4 className="_nav_dropdown_title">{user?.first_name || 'User'} {user?.last_name || ''}</h4>

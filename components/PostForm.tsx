@@ -2,12 +2,15 @@
 
 import { useState, useRef } from 'react';
 import { api } from '@/lib/api';
+import { useAuth } from '@/app/context/AuthContext';
+import Avatar from './Avatar';
 
 interface Props {
   onPostCreated?: () => void;
 }
 
 export default function PostForm({ onPostCreated }: Props) {
+  const { user } = useAuth();
   const [content, setContent] = useState('');
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -54,7 +57,14 @@ export default function PostForm({ onPostCreated }: Props) {
       <form onSubmit={handleSubmit}>
         <div className="_feed_inner_text_area_box" style={{ position: 'relative' }}>
           <div className="_feed_inner_text_area_box_image">
-            <img src="/assets/images/txt_img.png" alt="User avatar" className="_txt_img" />
+            <Avatar
+              profile_image={user?.profile_image || null}
+              first_name={user?.first_name}
+              last_name={user?.last_name}
+              size={44}
+              className="_txt_img"
+              alt="User avatar"
+            />
           </div>
           <div className="form-floating _feed_inner_text_area_box_form">
             <textarea

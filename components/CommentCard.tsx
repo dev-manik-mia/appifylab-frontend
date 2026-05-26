@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/app/context/AuthContext';
 import { api } from '@/lib/api';
 import type { Comment } from '@/lib/types';
+import Avatar from './Avatar';
 
 interface Props {
   comment: Comment;
@@ -78,10 +79,13 @@ export default function CommentCard({ comment, postId, depth = 1, onCommentAdded
     <div className="_comment_main">
       <div className="_comment_image">
         <Link href={`/profile/${comment.user_id}`} className="_comment_image_link">
-          <img
-            src={comment.user.profile_image || '/assets/images/txt_img.png'}
-            alt={`${comment.user.first_name} ${comment.user.last_name}`}
+          <Avatar
+            profile_image={comment.user.profile_image}
+            first_name={comment.user.first_name}
+            last_name={comment.user.last_name}
+            size={44}
             className="_comment_img1"
+            alt={`${comment.user.first_name} ${comment.user.last_name}`}
           />
         </Link>
       </div>
@@ -155,7 +159,14 @@ export default function CommentCard({ comment, postId, depth = 1, onCommentAdded
             >
               <div className="_feed_inner_comment_box_content">
                 <div className="_feed_inner_comment_box_content_image">
-                  <img src="/assets/images/comment_img.png" alt="Commenter avatar" className="_comment_img" />
+                  <Avatar
+                    profile_image={user?.profile_image || null}
+                    first_name={user?.first_name}
+                    last_name={user?.last_name}
+                    size={40}
+                    className="_comment_img"
+                    alt="Commenter avatar"
+                  />
                 </div>
                 <div className="_feed_inner_comment_box_content_txt">
                   <textarea

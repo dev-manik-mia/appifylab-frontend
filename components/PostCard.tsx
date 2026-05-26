@@ -8,6 +8,7 @@ import { useAuth } from '@/app/context/AuthContext';
 import CommentCard from './CommentCard';
 import ReactionAvatars from './ReactionAvatars';
 import PostEditModal from './PostEditModal';
+import Avatar from './Avatar';
 
 const REACTION_IDS: Record<ReactionType, number> = {
   like: 1,
@@ -168,7 +169,14 @@ export default function PostCard({ post, onPostDeleted }: Props) {
         <div className="_feed_inner_timeline_post_top">
           <div className="_feed_inner_timeline_post_box">
             <div className="_feed_inner_timeline_post_box_image">
-              <Image src="/assets/images/post_img.png" alt="User avatar" className="_post_img" width={44} height={44} />
+              <Avatar
+                profile_image={post.user.profile_image}
+                first_name={post.user.first_name}
+                last_name={post.user.last_name}
+                size={44}
+                className="_post_img"
+                alt={`${post.user.first_name} ${post.user.last_name}`}
+              />
             </div>
             <div className="_feed_inner_timeline_post_box_txt">
               <h4 className="_feed_inner_timeline_post_box_title">
@@ -351,7 +359,14 @@ export default function PostCard({ post, onPostDeleted }: Props) {
               <form className="_feed_inner_comment_box_form" onSubmit={(e) => { e.preventDefault(); handleQuickComment(); }}>
                 <div className="_feed_inner_comment_box_content">
                   <div className="_feed_inner_comment_box_content_image">
-                    <Image src="/assets/images/comment_img.png" alt="Commenter avatar" className="_comment_img" width={40} height={40} />
+                    <Avatar
+                      profile_image={user?.profile_image || null}
+                      first_name={user?.first_name}
+                      last_name={user?.last_name}
+                      size={40}
+                      className="_comment_img"
+                      alt="Commenter avatar"
+                    />
                   </div>
                   <div className="_feed_inner_comment_box_content_txt">
                     <textarea
@@ -477,7 +492,14 @@ export default function PostCard({ post, onPostDeleted }: Props) {
                 reactions.map((r) => (
                   <div className="_reaction_item" key={r.id}>
                     <div className="_reaction_item_user">
-                      <Image src="/assets/images/post_img.png" alt="User avatar" className="_reaction_user_img" width={36} height={36} />
+                      <Avatar
+                        profile_image={r.user?.profile_image || null}
+                        first_name={r.user?.first_name}
+                        last_name={r.user?.last_name}
+                        size={36}
+                        className="_reaction_user_img"
+                        alt="User avatar"
+                      />
                       <span>{r.user ? `${r.user.first_name} ${r.user.last_name}` : `User #${r.user_id}`}</span>
                     </div>
                     <ReactionIcon type={r.type as ReactionType} />

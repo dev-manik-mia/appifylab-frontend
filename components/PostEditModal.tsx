@@ -3,6 +3,8 @@
 import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { api } from '@/lib/api';
 import type { Post } from '@/lib/types';
+import { useAuth } from '@/app/context/AuthContext';
+import Avatar from './Avatar';
 
 interface Props {
   post: Pick<Post, 'id' | 'content' | 'visibility' | 'image'>;
@@ -11,6 +13,7 @@ interface Props {
 }
 
 export default function PostEditModal({ post, onClose, onUpdated }: Props) {
+  const { user } = useAuth();
   const [content, setContent] = useState(post.content);
   const [visibility, setVisibility] = useState<'public' | 'private'>(post.visibility);
   const [image, setImage] = useState<File | null>(null);
@@ -77,7 +80,14 @@ export default function PostEditModal({ post, onClose, onUpdated }: Props) {
           <form onSubmit={handleSubmit}>
             <div className="_feed_inner_text_area_box" style={{ position: 'relative' }}>
               <div className="_feed_inner_text_area_box_image">
-                <img src="/assets/images/txt_img.png" alt="User avatar" className="_txt_img" />
+                <Avatar
+                  profile_image={user?.profile_image || null}
+                  first_name={user?.first_name}
+                  last_name={user?.last_name}
+                  size={44}
+                  className="_txt_img"
+                  alt="User avatar"
+                />
               </div>
               <div className="form-floating _feed_inner_text_area_box_form">
                 <textarea

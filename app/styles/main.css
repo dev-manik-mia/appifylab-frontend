@@ -1961,6 +1961,9 @@
 ._feed_inner_timeline_cooment_area {
     padding:24px 24px 10px;
 }
+._comment_loading {
+    margin-left: 30px;
+}
 ._feed_inner_comment_box {
     background: #F6F6F6;
     border-radius: 18px;

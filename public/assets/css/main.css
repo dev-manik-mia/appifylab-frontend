@@ -5914,6 +5914,7 @@
     max-width: fit-content;
     position: relative;
     margin: 0 0 50px;
+    min-wdith: 300px;
 }
 ._comment_details_top {
     display: flex;
