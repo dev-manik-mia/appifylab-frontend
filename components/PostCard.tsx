@@ -1,11 +1,13 @@
 'use client';
 
+import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
 import { api } from '@/lib/api';
 import type { Post, Comment, Reaction, ReactionType } from '@/lib/types';
 import { useAuth } from '@/app/context/AuthContext';
 import CommentCard from './CommentCard';
 import ReactionAvatars from './ReactionAvatars';
+import PostEditModal from './PostEditModal';
 
 const REACTION_IDS: Record<ReactionType, number> = {
   like: 1,
@@ -24,6 +26,9 @@ interface Props {
 
 export default function PostCard({ post, onPostDeleted }: Props) {
   const { user } = useAuth();
+  const [postContent, setPostContent] = useState(post.content);
+  const [postImage, setPostImage] = useState<string | null>(post.image);
+  const [postVisibility, setPostVisibility] = useState<'public' | 'private'>(post.visibility);
   const [comments, setComments] = useState<Comment[]>([]);
   const [showComments, setShowComments] = useState(false);
   const [loadingComments, setLoadingComments] = useState(false);
@@ -34,10 +39,10 @@ export default function PostCard({ post, onPostDeleted }: Props) {
   const [reactions, setReactions] = useState<Reaction[]>(post.reactions || []);
   const [myReaction, setMyReaction] = useState<ReactionType | null>(post.my_reaction || null);
   const [showReactionPicker, setShowReactionPicker] = useState(false);
-  const reactionPickerRef = useRef<HTMLDivElement>(null);
   const hidePickerTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [showReactionsModal, setShowReactionsModal] = useState(false);
   const [showAllComments, setShowAllComments] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   const isOwner = user?.id === post.user_id;
 
@@ -153,13 +158,17 @@ export default function PostCard({ post, onPostDeleted }: Props) {
     }
   };
 
+  const openEditModal = () => {
+    setShowEditModal(true);
+  };
+
   return (
     <div className="_feed_inner_timeline_post_area _b_radious6 _padd_b24 _padd_t24 _mar_b16">
       <div className="_feed_inner_timeline_content _padd_r24 _padd_l24">
         <div className="_feed_inner_timeline_post_top">
           <div className="_feed_inner_timeline_post_box">
             <div className="_feed_inner_timeline_post_box_image">
-              <img src="/assets/images/post_img.png" alt="User avatar" className="_post_img" />
+              <Image src="/assets/images/post_img.png" alt="User avatar" className="_post_img" width={44} height={44} />
             </div>
             <div className="_feed_inner_timeline_post_box_txt">
               <h4 className="_feed_inner_timeline_post_box_title">
@@ -167,7 +176,7 @@ export default function PostCard({ post, onPostDeleted }: Props) {
               </h4>
               <p className="_feed_inner_timeline_post_box_para">
                 {new Date(post.created_at).toLocaleDateString()} .
-                <span className="_visibility_badge">{post.visibility === 'private' ? 'Private' : 'Public'}</span>
+                <span className="_visibility_badge">{postVisibility === 'private' ? 'Private' : 'Public'}</span>
               </p>
             </div>
           </div>
@@ -220,7 +229,7 @@ export default function PostCard({ post, onPostDeleted }: Props) {
                   </li>
                   {isOwner && (
                     <li className="_feed_timeline_dropdown_item">
-                      <a href="#0" className="_feed_timeline_dropdown_link" onClick={(e) => { e.preventDefault(); setShowDropdown(false); }}>
+                      <a href="#0" className="_feed_timeline_dropdown_link" onClick={(e) => { e.preventDefault(); setShowDropdown(false); openEditModal(); }}>
                         <span>
                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 18 18">
                             <path stroke="#1890FF" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.2" d="M8.25 3H3a1.5 1.5 0 00-1.5 1.5V15A1.5 1.5 0 003 16.5h10.5A1.5 1.5 0 0015 15V9.75" />
@@ -248,10 +257,17 @@ export default function PostCard({ post, onPostDeleted }: Props) {
             )}
           </div>
         </div>
-        <h4 className="_feed_inner_timeline_post_title">{post.content}</h4>
-        {post.image && (
+        <h4 className="_feed_inner_timeline_post_title">{postContent}</h4>
+        {postImage && (
           <div className="_feed_inner_timeline_image" style={{ marginBottom: 16 }}>
-            <img src={post.image} alt="" className="_time_img" style={{ maxHeight: 400, objectFit: 'cover', borderRadius: 8 }} />
+            <Image
+              src={postImage}
+              alt="Post image"
+              className="_time_img"
+              width={1200}
+              height={800}
+              style={{ maxHeight: 400, objectFit: 'cover', borderRadius: 8, width: '100%', height: 'auto' }}
+            />
           </div>
         )}
       </div>
@@ -334,7 +350,7 @@ export default function PostCard({ post, onPostDeleted }: Props) {
               <form className="_feed_inner_comment_box_form" onSubmit={(e) => { e.preventDefault(); handleQuickComment(); }}>
                 <div className="_feed_inner_comment_box_content">
                   <div className="_feed_inner_comment_box_content_image">
-                    <img src="/assets/images/comment_img.png" alt="Commenter avatar" className="_comment_img" />
+                    <Image src="/assets/images/comment_img.png" alt="Commenter avatar" className="_comment_img" width={40} height={40} />
                   </div>
                   <div className="_feed_inner_comment_box_content_txt">
                     <textarea
@@ -460,7 +476,7 @@ export default function PostCard({ post, onPostDeleted }: Props) {
                 reactions.map((r) => (
                   <div className="_reaction_item" key={r.id}>
                     <div className="_reaction_item_user">
-                      <img src="/assets/images/post_img.png" alt="User avatar" className="_reaction_user_img" />
+                      <Image src="/assets/images/post_img.png" alt="User avatar" className="_reaction_user_img" width={36} height={36} />
                       <span>{r.user ? `${r.user.first_name} ${r.user.last_name}` : `User #${r.user_id}`}</span>
                     </div>
                     <ReactionIcon type={r.type as ReactionType} />
@@ -498,6 +514,23 @@ export default function PostCard({ post, onPostDeleted }: Props) {
             `}</style>
           </div>
         </div>
+      )}
+
+      {showEditModal && (
+        <PostEditModal
+          post={{
+            id: post.id,
+            content: postContent,
+            visibility: postVisibility,
+            image: postImage,
+          }}
+          onClose={() => setShowEditModal(false)}
+          onUpdated={(updatedPost) => {
+            setPostContent(updatedPost.content);
+            setPostVisibility(updatedPost.visibility);
+            setPostImage(updatedPost.image);
+          }}
+        />
       )}
     </div>
   );

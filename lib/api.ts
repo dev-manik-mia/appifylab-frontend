@@ -128,6 +128,21 @@ class ApiClient {
     return this.upload<{ success: boolean; data: unknown }>('/posts', formData);
   }
 
+  async updatePost(postId: number, data: { content: string; visibility: string; image?: File; remove_image?: boolean }) {
+    const formData = new FormData();
+    formData.append('content', data.content);
+    formData.append('visibility', data.visibility);
+    if (data.image) {
+      formData.append('image', data.image);
+    }
+    if (data.remove_image) {
+      formData.append('remove_image', '1');
+    }
+    // Keep multipart/file upload compatible with Laravel by using method spoofing.
+    formData.append('_method', 'PUT');
+    return this.postForm<{ success: boolean; data: unknown; message?: string }>(`/posts/${postId}`, formData);
+  }
+
   async toggleReaction(postId: number, reactionId: number) {
     return this.post<{ success: boolean; data: { my_reaction: string | null; reactions: unknown[] } }>(`/posts/${postId}/reactions`, { reaction_id: reactionId });
   }
