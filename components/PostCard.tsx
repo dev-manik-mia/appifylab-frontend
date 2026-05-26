@@ -223,14 +223,21 @@ export default function PostCard({ post, onPostDeleted }: Props) {
         )}
       </div>
       <div className="_feed_inner_timeline_total_reacts _padd_r24 _padd_l24 _mar_b26">
-        <ReactionAvatars reactions={reactions} onClick={() => setShowReactionsModal(true)} />
-        <div className="_feed_inner_timeline_total_reacts_txt">
-          <p className="_feed_inner_timeline_total_reacts_para1">
-            <button onClick={toggleComments}>
-              <span>{commentsCount}</span> Comment{commentsCount !== 1 ? 's' : ''}
-            </button>
-          </p>
+        <div
+          className="_feed_inner_timeline_total_reacts_image"
+          style={{ cursor: reactions.length > 0 ? 'pointer' : undefined }}
+          onClick={reactions.length > 0 ? () => setShowReactionsModal(true) : undefined}
+        >
+          <ReactionAvatars reactions={reactions} onClick={() => setShowReactionsModal(true)} />
         </div>
+        <div className="_feed_inner_timeline_total_reacts_txt">
+            <p className="_feed_inner_timeline_total_reacts_para1">
+              <button onClick={toggleComments} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(0,0,0,0.46)', padding: 0, font: 'inherit' }}>
+                <span>{commentsCount}</span> Comment{commentsCount !== 1 ? 's' : ''}
+              </button>
+            </p>
+            <p className="_feed_inner_timeline_total_reacts_para2"><span>{post.shares_count ?? 0}</span> Share</p>
+          </div>
       </div>
       <div className="_feed_inner_timeline_reaction" onMouseLeave={hidePicker}>
         <div style={{ flex: 1, position: 'relative', display: 'flex' }}>
@@ -421,7 +428,7 @@ export default function PostCard({ post, onPostDeleted }: Props) {
                   <div className="_reaction_item" key={r.id}>
                     <div className="_reaction_item_user">
                       <img src="/assets/images/post_img.png" alt="User avatar" className="_reaction_user_img" />
-                      <span>{r.user.first_name} {r.user.last_name}</span>
+                      <span>{r.user ? `${r.user.first_name} ${r.user.last_name}` : `User #${r.user_id}`}</span>
                     </div>
                     <ReactionIcon type={r.type as ReactionType} />
                   </div>

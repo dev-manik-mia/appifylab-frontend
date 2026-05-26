@@ -40,8 +40,12 @@ class ApiClient {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ message: 'Request failed' }));
-      const err = new Error(error.message || 'Request failed') as Error & { errors?: Record<string, string[]> };
+      const err = new Error(error.message || 'Request failed') as Error & { errors?: Record<string, string[]>; status?: number };
       err.errors = error.errors;
+      err.status = response.status;
+      if (response.status === 429) {
+        err.message = 'Too many requests. Please wait a moment and try again.';
+      }
       throw err;
     }
 
@@ -104,6 +108,10 @@ class ApiClient {
   // Posts
   async getPosts(page: number = 1) {
     return this.get<{ success: boolean; data: PaginatedData<unknown> }>(`/posts?page=${page}`);
+  }
+
+  async getUserPosts(userId: number, page: number = 1) {
+    return this.get<{ success: boolean; data: PaginatedData<unknown> }>(`/users/${userId}/posts?page=${page}`);
   }
 
   async createPost(data: { content: string; visibility: string; image?: File }) {

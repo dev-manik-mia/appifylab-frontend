@@ -423,7 +423,7 @@ export default function Navbar() {
                 </div>
                 <div className="_nav_profile_dropdown_info_txt">
                   <h4 className="_nav_dropdown_title">{user?.first_name || 'User'} {user?.last_name || ''}</h4>
-                  <Link href="/profile" className="_nav_drop_profile">
+                  <Link href="/profile" className="_nav_drop_profile" onClick={() => setShowProfile(false)}>
                     View Profile
                   </Link>
                 </div>
@@ -431,7 +431,7 @@ export default function Navbar() {
               <hr />
               <ul className="_nav_dropdown_list">
                 <li className="_nav_dropdown_list_item">
-                  <Link href="/settings" className="_nav_dropdown_link">
+                  <Link href="/settings" className="_nav_dropdown_link" onClick={() => setShowProfile(false)}>
                     <div className="_nav_drop_info">
                       <span>
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="19" fill="none" viewBox="0 0 18 19">
@@ -448,7 +448,7 @@ export default function Navbar() {
                   </Link>
                 </li>
                 <li className="_nav_dropdown_list_item">
-                  <Link href="/help" className="_nav_dropdown_link">
+                  <Link href="/help" className="_nav_dropdown_link" onClick={() => setShowProfile(false)}>
                     <div className="_nav_drop_info">
                       <span>
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 20 20">
@@ -466,7 +466,7 @@ export default function Navbar() {
                   </Link>
                 </li>
                 <li className="_nav_dropdown_list_item">
-                  <button className="_nav_dropdown_link" onClick={logout}>
+                  <button className="_nav_dropdown_link" onClick={() => { setShowProfile(false); logout(); }}>
                     <div className="_nav_drop_info">
                       <span>
                         <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="none" viewBox="0 0 19 19">

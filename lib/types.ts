@@ -17,6 +17,7 @@ export interface Post {
   user: User;
   likes_count: number;
   comments_count: number;
+  shares_count?: number;
   is_liked: boolean;
   my_reaction: ReactionType | null;
   reactions: Reaction[];
@@ -44,7 +45,7 @@ export interface Reaction {
   post_id: number;
   user_id: number;
   type: ReactionType;
-  user: User;
+  user?: User;
   created_at: string;
 }
 
