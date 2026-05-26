@@ -266,6 +266,7 @@ export default function PostCard({ post, onPostDeleted }: Props) {
               className="_time_img"
               width={1200}
               height={800}
+              unoptimized
               style={{ maxHeight: 400, objectFit: 'cover', borderRadius: 8, width: '100%', height: 'auto' }}
             />
           </div>
