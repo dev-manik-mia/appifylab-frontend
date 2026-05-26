@@ -411,7 +411,7 @@ export default function Navbar() {
                 profile_image={user?.profile_image || null}
                 first_name={user?.first_name}
                 last_name={user?.last_name}
-                size={44}
+                size={32}
                 className="_nav_profile_img"
                 alt="Profile"
               />

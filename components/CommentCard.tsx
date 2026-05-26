@@ -83,7 +83,7 @@ export default function CommentCard({ comment, postId, depth = 1, onCommentAdded
             profile_image={comment.user.profile_image}
             first_name={comment.user.first_name}
             last_name={comment.user.last_name}
-            size={44}
+            size={40}
             className="_comment_img1"
             alt={`${comment.user.first_name} ${comment.user.last_name}`}
           />
@@ -163,7 +163,7 @@ export default function CommentCard({ comment, postId, depth = 1, onCommentAdded
                     profile_image={user?.profile_image || null}
                     first_name={user?.first_name}
                     last_name={user?.last_name}
-                    size={40}
+                    size={36}
                     className="_comment_img"
                     alt="Commenter avatar"
                   />
