@@ -17,7 +17,10 @@ interface Props {
 
 export default function CommentCard({ comment, postId, depth = 1, onCommentAdded, onCommentDeleted }: Props) {
   const { user } = useAuth();
+  const canReply = depth === 1;
   const [showReplyForm, setShowReplyForm] = useState(false);
+  const [replyText, setReplyText] = useState('');
+  const [replyLoading, setReplyLoading] = useState(false);
   const [liked, setLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(comment.likes_count);
 
@@ -75,6 +78,26 @@ export default function CommentCard({ comment, postId, depth = 1, onCommentAdded
     }
   };
 
+  const handleReplySubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!replyText.trim()) return;
+
+    setReplyLoading(true);
+    try {
+      const res = await api.createComment(postId, {
+        content: replyText.trim(),
+        parent_id: comment.id,
+      });
+      onCommentAdded(res.data);
+      setReplyText('');
+      setShowReplyForm(false);
+    } catch (err) {
+      console.error('Failed to create reply:', err);
+    } finally {
+      setReplyLoading(false);
+    }
+  };
+
   return (
     <div className="_comment_main">
       <div className="_comment_image">
@@ -124,7 +147,9 @@ export default function CommentCard({ comment, postId, depth = 1, onCommentAdded
             <div className="_comment_reply_num">
               <ul className="_comment_reply_list">
                 <li><span onClick={handleLike} style={{ color: liked ? '#377DFF' : undefined, cursor: 'pointer' }}>Like.</span></li>
-                <li><span onClick={() => setShowReplyForm(!showReplyForm)} style={{ cursor: 'pointer' }}>Reply.</span></li>
+                {canReply && (
+                  <li><span onClick={() => setShowReplyForm(!showReplyForm)} style={{ cursor: 'pointer' }}>Reply.</span></li>
+                )}
                 <li><span style={{ cursor: 'pointer' }}>Share</span></li>
                 <li><span className="_time_link">{formatTime(comment.created_at)}</span></li>
                 {isOwner && (
@@ -135,28 +160,9 @@ export default function CommentCard({ comment, postId, depth = 1, onCommentAdded
           </div>
         </div>
 
-        {showReplyForm && (
+        {canReply && showReplyForm && (
           <div className="_feed_inner_comment_box">
-            <form
-              className="_feed_inner_comment_box_form"
-              onSubmit={async (e) => {
-                e.preventDefault();
-                const form = e.currentTarget;
-                const textarea = form.querySelector('textarea');
-                if (!textarea || !textarea.value.trim()) return;
-                try {
-                  const res = await api.createComment(postId, {
-                    content: textarea.value.trim(),
-                    parent_id: comment.id,
-                  });
-                  onCommentAdded(res.data);
-                  textarea.value = '';
-                  setShowReplyForm(false);
-                } catch (err) {
-                  console.error('Failed to create reply:', err);
-                }
-              }}
-            >
+            <form className="_feed_inner_comment_box_form" onSubmit={handleReplySubmit}>
               <div className="_feed_inner_comment_box_content">
                 <div className="_feed_inner_comment_box_content_image">
                   <Avatar
@@ -172,6 +178,9 @@ export default function CommentCard({ comment, postId, depth = 1, onCommentAdded
                   <textarea
                     className="form-control _comment_textarea"
                     placeholder="Write a comment"
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    disabled={replyLoading}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
@@ -197,7 +206,7 @@ export default function CommentCard({ comment, postId, depth = 1, onCommentAdded
           </div>
         )}
 
-        {comment.replies && comment.replies.length > 0 && depth < 5 && (
+        {depth === 1 && comment.replies && comment.replies.length > 0 && (
           <div className="_comment_replies" style={{ paddingLeft: 48 }}>
             {comment.replies.map((reply) => (
               <CommentCard

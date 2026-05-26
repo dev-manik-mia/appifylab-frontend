@@ -64,7 +64,7 @@ export default function PostCard({ post, onPostDeleted }: Props) {
       setLoadingComments(true);
       api.getComments(post.id).then((res) => {
         setComments(res.data);
-        setShowAllComments(false);
+        setShowAllComments(true);
       }).catch((err) => {
         console.error('Failed to fetch comments:', err);
       }).finally(() => {
@@ -88,20 +88,10 @@ export default function PostCard({ post, onPostDeleted }: Props) {
       setComments((prev) => [comment, ...prev]);
       setCommentsCount((prev) => prev + 1);
     } else {
-      setComments((prev) => addReplyToComment(prev, comment));
+      setComments((prev) => prev.map((c) => (
+        c.id === comment.parent_id ? { ...c, replies: [...(c.replies || []), comment] } : c
+      )));
     }
-  };
-
-  const addReplyToComment = (items: Comment[], newReply: Comment): Comment[] => {
-    return items.map((c) => {
-      if (c.id === newReply.parent_id) {
-        return { ...c, replies: [...(c.replies || []), newReply] };
-      }
-      if (c.replies && c.replies.length > 0) {
-        return { ...c, replies: addReplyToComment(c.replies, newReply) };
-      }
-      return c;
-    });
   };
 
   const handleCommentDeleted = (commentId: number, parentId: number | null) => {
@@ -112,13 +102,9 @@ export default function PostCard({ post, onPostDeleted }: Props) {
   };
 
   const removeComment = (items: Comment[], id: number): Comment[] => {
-    return items.filter((c) => {
-      if (c.id === id) return false;
-      if (c.replies && c.replies.length > 0) {
-        c.replies = removeComment(c.replies, id);
-      }
-      return true;
-    });
+    return items
+      .filter((c) => c.id !== id)
+      .map((c) => ({ ...c, replies: (c.replies || []).filter((r) => r.id !== id) }));
   };
 
   const showPicker = () => {
@@ -405,18 +391,7 @@ export default function PostCard({ post, onPostDeleted }: Props) {
             <p className="_comment_empty">No comments yet.</p>
           ) : (
             <div className="_timline_comment_main">
-              {comments.length > 1 && !showAllComments && (
-                <div className="_previous_comment">
-                  <button
-                    type="button"
-                    className="_previous_comment_txt"
-                    onClick={() => setShowAllComments(true)}
-                  >
-                    View {comments.length - 1} previous {comments.length - 1 === 1 ? 'comment' : 'comments'}
-                  </button>
-                </div>
-              )}
-              {(showAllComments ? comments : [comments[0]]).map((comment) => (
+              {comments.map((comment) => (
                 <CommentCard
                   key={comment.id}
                   comment={comment}
