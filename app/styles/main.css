@@ -5641,6 +5641,10 @@
     visibility: hidden;
     transition:.2s all ease;
 }
+._feed_timeline_dropdown.show {
+    opacity: 1;
+    visibility: visible;
+}
 ._feed_timeline_dropdown_item {
     margin:0 0 16px 0;
 }
@@ -5649,6 +5653,9 @@
     font-size: 16px;
     line-height: 1.2;
     color: #666666;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
     -webkit-transition: .2s all ease;
     -o-transition: .2s all ease;
     transition: .2s all ease;
