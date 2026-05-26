@@ -45,6 +45,18 @@ export default function Avatar({
         height={size}
         className={className}
         unoptimized
+        style={{
+          width: size,
+          height: size,
+          minWidth: size,
+          minHeight: size,
+          maxWidth: size,
+          maxHeight: size,
+          aspectRatio: '1 / 1',
+          borderRadius: '50%',
+          objectFit: 'cover',
+          flexShrink: 0,
+        }}
       />
     );
   }
@@ -55,6 +67,11 @@ export default function Avatar({
       style={{
         width: size,
         height: size,
+        minWidth: size,
+        minHeight: size,
+        maxWidth: size,
+        maxHeight: size,
+        aspectRatio: '1 / 1',
         borderRadius: '50%',
         display: 'inline-flex',
         alignItems: 'center',
@@ -65,6 +82,8 @@ export default function Avatar({
         fontSize: Math.max(10, Math.floor(size * 0.38)),
         lineHeight: 1,
         textTransform: 'uppercase',
+        flexShrink: 0,
+        overflow: 'hidden',
       }}
       aria-label={alt || 'User avatar'}
     >
