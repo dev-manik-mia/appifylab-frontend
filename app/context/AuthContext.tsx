@@ -48,7 +48,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const res = await api.me();
       setUser(res.data as User);
-    } catch {
+    } catch (err) {
+      console.error('Failed to fetch user:', err);
       setToken(null);
       setUser(null);
       localStorage.removeItem('token');
@@ -92,8 +93,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     try {
       await api.logout();
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error('Logout API call failed:', err);
     }
     localStorage.removeItem('token');
     removeCookie('token');

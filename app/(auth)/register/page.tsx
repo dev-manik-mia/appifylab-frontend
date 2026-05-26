@@ -44,16 +44,16 @@ export default function RegisterPage() {
   return (
     <section className="_social_registration_wrapper _layout_main_wrapper">
       <div className="_shape_one">
-        <Image src="/assets/images/shape1.svg" alt="" className="_shape_img" width={176} height={540} />
-        <Image src="/assets/images/dark_shape.svg" alt="" className="_dark_shape" width={176} height={540} />
+                  <Image src="/assets/images/shape1.svg" alt="Decorative shape" className="_shape_img" width={176} height={540} />
+                  <Image src="/assets/images/dark_shape.svg" alt="Decorative shape" className="_dark_shape" width={176} height={540} />
       </div>
       <div className="_shape_two">
-        <Image src="/assets/images/shape2.svg" alt="" className="_shape_img" width={568} height={400} />
-        <Image src="/assets/images/dark_shape1.svg" alt="" className="_dark_shape _dark_shape_opacity" width={576} height={408} />
+                  <Image src="/assets/images/shape2.svg" alt="Decorative shape" className="_shape_img" width={568} height={400} />
+                  <Image src="/assets/images/dark_shape1.svg" alt="Decorative shape" className="_dark_shape _dark_shape_opacity" width={576} height={408} />
       </div>
       <div className="_shape_three">
-        <Image src="/assets/images/shape3.svg" alt="" className="_shape_img" width={568} height={548} />
-        <Image src="/assets/images/dark_shape2.svg" alt="" className="_dark_shape _dark_shape_opacity" width={568} height={548} />
+                  <Image src="/assets/images/shape3.svg" alt="Decorative shape" className="_shape_img" width={568} height={548} />
+                  <Image src="/assets/images/dark_shape2.svg" alt="Decorative shape" className="_dark_shape _dark_shape_opacity" width={568} height={548} />
       </div>
       <div className="_social_registration_wrap">
         <div className="container">
@@ -61,22 +61,22 @@ export default function RegisterPage() {
             <div className="col-xl-8 col-lg-8 col-md-12 col-sm-12">
               <div className="_social_registration_right">
                 <div className="_social_registration_right_image">
-                  <Image src="/assets/images/registration.png" alt="Image" width={1928} height={1422} />
+                  <Image src="/assets/images/registration.png" alt="Registration illustration" width={1928} height={1422} />
                 </div>
                 <div className="_social_registration_right_image_dark">
-                  <Image src="/assets/images/registration1.png" alt="Image" width={1928} height={1422} />
+                  <Image src="/assets/images/registration1.png" alt="Registration illustration" width={1928} height={1422} />
                 </div>
               </div>
             </div>
             <div className="col-xl-4 col-lg-4 col-md-12 col-sm-12">
               <div className="_social_registration_content">
                 <div className="_social_registration_right_logo _mar_b28">
-                  <Image src="/assets/images/logo.svg" alt="Image" className="_right_logo" width={158} height={33} />
+                  <Image src="/assets/images/logo.svg" alt="Buddy Script logo" className="_right_logo" width={158} height={33} />
                 </div>
                 <p className="_social_registration_content_para _mar_b8">Get Started Now</p>
                 <h4 className="_social_registration_content_title _titl4 _mar_b28">Registration</h4>
                 <button type="button" className="_social_registration_content_btn _mar_b24">
-                  <Image src="/assets/images/google.svg" alt="Image" className="_google_img" width={20} height={20} /> <span>Register with google</span>
+                  <Image src="/assets/images/google.svg" alt="Google logo" className="_google_img" width={20} height={20} /> <span>Register with google</span>
                 </button>
                 <div className="_social_registration_content_bottom_txt _mar_b24"> <span>Or</span>
                 </div>
@@ -92,6 +92,7 @@ export default function RegisterPage() {
                           value={firstName}
                           onChange={(e) => setFirstName(e.target.value)}
                           onKeyDown={(e) => { if (e.key === 'Enter') handleSubmit(e as unknown as React.FormEvent); }}
+                          autoFocus
                           required
                         />
                       </div>

@@ -103,7 +103,7 @@ export default function PostDetailPage({
                 <h4 className="_feed_sidebar_title _mar_b16">Trending Topics</h4>
                 {['#HealthTracking', '#Fitness', '#Wellness', '#Technology', '#AI'].map((topic) => (
                   <div className="_feed_trending_item _mar_b12" key={topic}>
-                    <Link href="#0" className="_feed_trending_link">{topic}</Link>
+                    <Link href={`/search?q=${encodeURIComponent(topic)}`} className="_feed_trending_link">{topic}</Link>
                     <p className="_feed_trending_count">1,234 posts</p>
                   </div>
                 ))}

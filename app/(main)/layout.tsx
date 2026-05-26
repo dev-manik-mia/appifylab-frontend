@@ -1,6 +1,7 @@
 'use client';
 
 import { AuthProvider } from '@/app/context/AuthContext';
+import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import MobileNavigation from '@/components/MobileNavigation';
 import Sidebar from '@/components/Sidebar';
@@ -41,18 +42,18 @@ export default function MainLayout({
                     <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                       <div className="_header_mobile_menu_top_inner">
                         <div className="_header_mobile_menu_logo">
-                          <a href="/" className="_mobile_logo_link">
-                            <img src="/assets/images/logo.svg" alt="Image" className="_nav_logo" />
-                          </a>
+                          <Link href="/" className="_mobile_logo_link">
+                            <img src="/assets/images/logo.svg" alt="Buddy Script logo" className="_nav_logo" />
+                          </Link>
                         </div>
                         <div className="_header_mobile_menu_right">
-                          <form className="_header_form_grp">
-                            <a href="#0" className="_header_mobile_search">
+                            <form className="_header_form_grp">
+                            <Link href="/search" className="_header_mobile_search">
                               <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="none" viewBox="0 0 17 17">
                                 <circle cx="7" cy="7" r="6" stroke="#666" />
                                 <path stroke="#666" strokeLinecap="round" d="M16 16l-3-3" />
                               </svg>
-                            </a>
+                            </Link>
                           </form>
                         </div>
                       </div>
@@ -81,7 +82,7 @@ export default function MainLayout({
                               <div className="_right_inner_area_info_content _mar_b24">
                                 <h4 className="_right_inner_area_info_content_title _title5">You Might Like</h4>
                                 <span className="_right_inner_area_info_content_txt">
-                                  <a className="_right_inner_area_info_content_txt_link" href="#0">See All</a>
+                                  <Link className="_right_inner_area_info_content_txt_link" href="/">See All</Link>
                                 </span>
                               </div>
                               <hr className="_underline" />
@@ -91,14 +92,14 @@ export default function MainLayout({
                                 <div className="_right_inner_area_info_ppl" key={person.name}>
                                   <div className="_right_inner_area_info_box">
                                     <div className="_right_inner_area_info_box_image">
-                                      <a href="#0">
-                                        <img src={`/assets/images/${person.img}`} alt="Image" className="_ppl_img" />
-                                      </a>
+                                      <Link href="/">
+                                        <img src={`/assets/images/${person.img}`} alt={person.name} className="_ppl_img" />
+                                      </Link>
                                     </div>
                                     <div className="_right_inner_area_info_box_txt">
-                                      <a href="#0">
+                                      <Link href="/">
                                         <h4 className="_right_inner_area_info_box_title">{person.name}</h4>
-                                      </a>
+                                      </Link>
                                       <p className="_right_inner_area_info_box_para">{person.role}</p>
                                     </div>
                                   </div>
@@ -116,7 +117,7 @@ export default function MainLayout({
                                 <div className="_feed_right_inner_area_card_content _mar_b24">
                                   <h4 className="_feed_right_inner_area_card_content_title _title5">Your Friends</h4>
                                   <span className="_feed_right_inner_area_card_content_txt">
-                                    <a className="_feed_right_inner_area_card_content_txt_link" href="#0">See All</a>
+                                      <Link className="_feed_right_inner_area_card_content_txt_link" href="/">See All</Link>
                                   </span>
                                 </div>
                                 <form className="_feed_right_inner_area_card_form">
@@ -136,14 +137,14 @@ export default function MainLayout({
                                   <div className={`_feed_right_inner_area_card_ppl ${person.status === 'inactive' ? '_feed_right_inner_area_card_ppl_inactive' : ''}`} key={i}>
                                     <div className="_feed_right_inner_area_card_ppl_box">
                                       <div className="_feed_right_inner_area_card_ppl_image">
-                                        <a href="#0">
-                                          <img src={`/assets/images/${person.img}`} alt="" className="_box_ppl_img" />
-                                        </a>
+                                        <Link href="/">
+                                          <img src={`/assets/images/${person.img}`} alt={person.name} className="_box_ppl_img" />
+                                        </Link>
                                       </div>
                                       <div className="_feed_right_inner_area_card_ppl_txt">
-                                        <a href="#0">
+                                        <Link href="/">
                                           <h4 className="_feed_right_inner_area_card_ppl_title">{person.name}</h4>
-                                        </a>
+                                        </Link>
                                         <p className="_feed_right_inner_area_card_ppl_para">{person.role}</p>
                                       </div>
                                     </div>

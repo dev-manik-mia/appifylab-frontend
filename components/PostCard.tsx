@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { api } from '@/lib/api';
 import type { Post, Comment, Reaction, ReactionType } from '@/lib/types';
 import { useAuth } from '@/app/context/AuthContext';
@@ -51,32 +51,29 @@ export default function PostCard({ post, onPostDeleted }: Props) {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  const fetchComments = useCallback(async () => {
-    setLoadingComments(true);
-    try {
-      const res = await api.getComments(post.id);
-      setComments(res.data);
-      setShowAllComments(false);
-    } catch {
-      // ignore
-    } finally {
-      setLoadingComments(false);
+  const toggleComments = () => {
+    const next = !showComments;
+    setShowComments(next);
+    if (next) {
+      setLoadingComments(true);
+      api.getComments(post.id).then((res) => {
+        setComments(res.data);
+        setShowAllComments(false);
+      }).catch((err) => {
+        console.error('Failed to fetch comments:', err);
+      }).finally(() => {
+        setLoadingComments(false);
+      });
     }
-  }, [post.id]);
-
-  useEffect(() => {
-    if (showComments) {
-      fetchComments();
-    }
-  }, [showComments, fetchComments]);
+  };
 
   const handleDeletePost = async () => {
     if (!confirm('Delete this post?')) return;
     try {
       await api.delete(`/posts/${post.id}`);
       onPostDeleted?.();
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error('Failed to delete post:', err);
     }
   };
 
@@ -139,7 +136,8 @@ export default function PostCard({ post, onPostDeleted }: Props) {
       const res = await api.toggleReaction(post.id, REACTION_IDS[type]);
       setMyReaction(res.data.my_reaction as ReactionType | null);
       setReactions(res.data.reactions as Reaction[]);
-    } catch {
+    } catch (err) {
+      console.error('Failed to toggle reaction:', err);
       setMyReaction(prev);
     }
   };
@@ -150,8 +148,8 @@ export default function PostCard({ post, onPostDeleted }: Props) {
       const res = await api.createComment(post.id, { content: commentText.trim() });
       handleCommentAdded(res.data);
       setCommentText('');
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error('Failed to quick comment:', err);
     }
   };
 
@@ -161,7 +159,7 @@ export default function PostCard({ post, onPostDeleted }: Props) {
         <div className="_feed_inner_timeline_post_top">
           <div className="_feed_inner_timeline_post_box">
             <div className="_feed_inner_timeline_post_box_image">
-              <img src="/assets/images/post_img.png" alt="" className="_post_img" />
+              <img src="/assets/images/post_img.png" alt="User avatar" className="_post_img" />
             </div>
             <div className="_feed_inner_timeline_post_box_txt">
               <h4 className="_feed_inner_timeline_post_box_title">
@@ -169,7 +167,7 @@ export default function PostCard({ post, onPostDeleted }: Props) {
               </h4>
               <p className="_feed_inner_timeline_post_box_para">
                 {new Date(post.created_at).toLocaleDateString()} .
-                <a href="#0">{post.visibility === 'private' ? 'Private' : 'Public'}</a>
+                <span className="_visibility_badge">{post.visibility === 'private' ? 'Private' : 'Public'}</span>
               </p>
             </div>
           </div>
@@ -191,25 +189,25 @@ export default function PostCard({ post, onPostDeleted }: Props) {
               <div id="_timeline_drop" className="_feed_timeline_dropdown _timeline_dropdown show">
                 <ul className="_feed_timeline_dropdown_list">
                   <li className="_feed_timeline_dropdown_item">
-                    <a href="#0" className="_feed_timeline_dropdown_link">
+                    <button className="_feed_timeline_dropdown_link">
                       <span>
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 18 18">
                           <path stroke="#1890FF" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.2" d="M14.25 15.75L9 12l-5.25 3.75v-12a1.5 1.5 0 011.5-1.5h7.5a1.5 1.5 0 011.5 1.5v12z" />
                         </svg>
                       </span>
                       Save Post
-                    </a>
+                    </button>
                   </li>
                   {isOwner && (
                     <li className="_feed_timeline_dropdown_item">
-                      <a href="#0" className="_feed_timeline_dropdown_link" onClick={handleDeletePost}>
+                      <button className="_feed_timeline_dropdown_link" onClick={handleDeletePost}>
                         <span>
                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 18 18">
                             <path stroke="#1890FF" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.2" d="M2.25 4.5h13.5M6 4.5V3a1.5 1.5 0 011.5-1.5h3A1.5 1.5 0 0112 3v1.5m2.25 0V15a1.5 1.5 0 01-1.5 1.5h-7.5a1.5 1.5 0 01-1.5-1.5V4.5h10.5zM7.5 8.25v4.5M10.5 8.25v4.5" />
                           </svg>
                         </span>
                         Delete Post
-                      </a>
+                      </button>
                     </li>
                   )}
                 </ul>
@@ -228,9 +226,9 @@ export default function PostCard({ post, onPostDeleted }: Props) {
         <ReactionAvatars reactions={reactions} onClick={() => setShowReactionsModal(true)} />
         <div className="_feed_inner_timeline_total_reacts_txt">
           <p className="_feed_inner_timeline_total_reacts_para1">
-            <a href="#0" onClick={(e) => { e.preventDefault(); setShowComments(!showComments); }}>
+            <button onClick={toggleComments}>
               <span>{commentsCount}</span> Comment{commentsCount !== 1 ? 's' : ''}
-            </a>
+            </button>
           </p>
         </div>
       </div>
@@ -249,7 +247,7 @@ export default function PostCard({ post, onPostDeleted }: Props) {
               </span>
             </span>
           </button>
-          {showReactionPicker && (
+      {showReactionPicker && (
             <div className="_feed_reaction_picker" onMouseEnter={showPicker} onMouseLeave={hidePicker}>
               {(['like', 'love', 'haha', 'wow', 'sad', 'care', 'angry'] as ReactionType[]).map((type) => (
                 <button
@@ -265,7 +263,7 @@ export default function PostCard({ post, onPostDeleted }: Props) {
         </div>
         <button
           className="_feed_inner_timeline_reaction_comment _feed_reaction"
-          onClick={() => setShowComments(!showComments)}
+          onClick={toggleComments}
         >
           <span className="_feed_inner_timeline_reaction_link">
             <span>
@@ -296,7 +294,7 @@ export default function PostCard({ post, onPostDeleted }: Props) {
               <form className="_feed_inner_comment_box_form" onSubmit={(e) => { e.preventDefault(); handleQuickComment(); }}>
                 <div className="_feed_inner_comment_box_content">
                   <div className="_feed_inner_comment_box_content_image">
-                    <img src="/assets/images/comment_img.png" alt="" className="_comment_img" />
+                    <img src="/assets/images/comment_img.png" alt="Commenter avatar" className="_comment_img" />
                   </div>
                   <div className="_feed_inner_comment_box_content_txt">
                     <textarea
@@ -422,7 +420,7 @@ export default function PostCard({ post, onPostDeleted }: Props) {
                 reactions.map((r) => (
                   <div className="_reaction_item" key={r.id}>
                     <div className="_reaction_item_user">
-                      <img src="/assets/images/post_img.png" alt="" className="_reaction_user_img" />
+                      <img src="/assets/images/post_img.png" alt="User avatar" className="_reaction_user_img" />
                       <span>{r.user.first_name} {r.user.last_name}</span>
                     </div>
                     <ReactionIcon type={r.type as ReactionType} />

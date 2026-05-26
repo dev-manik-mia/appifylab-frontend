@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 
 const publicPaths = ['/login', '/register', '/auth'];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const token = request.cookies.get('token')?.value || 
     request.headers.get('authorization')?.replace('Bearer ', '') ||
     null;

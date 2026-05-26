@@ -24,8 +24,8 @@ export default function CommentForm({ postId, parentId = null, onCommentAdded, p
       const res = await api.createComment(postId, { content: content.trim(), parent_id: parentId });
       onCommentAdded(res.data);
       setContent('');
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error('Failed to create comment:', err);
     } finally {
       setLoading(false);
     }

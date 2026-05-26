@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useAuth } from '@/app/context/AuthContext';
 import { api } from '@/lib/api';
 import type { Comment } from '@/lib/types';
@@ -20,19 +21,24 @@ export default function CommentCard({ comment, postId, depth = 1, onCommentAdded
   const [likesCount, setLikesCount] = useState(comment.likes_count);
 
   const isOwner = user?.id === comment.user_id;
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 30000);
+    return () => clearInterval(id);
+  }, []);
 
   const handleDelete = async () => {
     if (!confirm('Delete this comment?')) return;
     try {
       await api.deleteComment(comment.id);
       onCommentDeleted(comment.id, comment.parent_id);
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error('Failed to delete comment:', err);
     }
   };
 
   const formatTime = (dateStr: string) => {
-    const now = Date.now();
     const then = new Date(dateStr).getTime();
     const diff = now - then;
     const mins = Math.floor(diff / 60000);
@@ -49,7 +55,8 @@ export default function CommentCard({ comment, postId, depth = 1, onCommentAdded
     setLikesCount((prev) => prev + (liked ? -1 : 1));
     try {
       await api.toggleCommentReaction(comment.id, 1);
-    } catch {
+    } catch (err) {
+      console.error('Failed to toggle like:', err);
       setLiked((prev) => !prev);
       setLikesCount((prev) => prev + (liked ? 1 : -1));
     }
@@ -60,7 +67,8 @@ export default function CommentCard({ comment, postId, depth = 1, onCommentAdded
     setLikesCount((prev) => prev + (liked ? -1 : 1));
     try {
       await api.toggleCommentReaction(comment.id, 2);
-    } catch {
+    } catch (err) {
+      console.error('Failed to toggle heart:', err);
       setLiked((prev) => !prev);
       setLikesCount((prev) => prev + (liked ? 1 : -1));
     }
@@ -69,23 +77,23 @@ export default function CommentCard({ comment, postId, depth = 1, onCommentAdded
   return (
     <div className="_comment_main">
       <div className="_comment_image">
-        <a href="#0" className="_comment_image_link">
+        <Link href={`/profile/${comment.user_id}`} className="_comment_image_link">
           <img
             src={comment.user.profile_image || '/assets/images/txt_img.png'}
-            alt=""
+            alt={`${comment.user.first_name} ${comment.user.last_name}`}
             className="_comment_img1"
           />
-        </a>
+        </Link>
       </div>
       <div className="_comment_area">
         <div className="_comment_details">
           <div className="_comment_details_top">
             <div className="_comment_name">
-              <a href="#0">
+              <Link href={`/profile/${comment.user_id}`}>
                 <h4 className="_comment_name_title">
                   {comment.user.first_name} {comment.user.last_name}
                 </h4>
-              </a>
+              </Link>
             </div>
           </div>
           <div className="_comment_status">
@@ -140,14 +148,14 @@ export default function CommentCard({ comment, postId, depth = 1, onCommentAdded
                   onCommentAdded(res.data);
                   textarea.value = '';
                   setShowReplyForm(false);
-                } catch {
-                  // ignore
+                } catch (err) {
+                  console.error('Failed to create reply:', err);
                 }
               }}
             >
               <div className="_feed_inner_comment_box_content">
                 <div className="_feed_inner_comment_box_content_image">
-                  <img src="/assets/images/comment_img.png" alt="" className="_comment_img" />
+                  <img src="/assets/images/comment_img.png" alt="Commenter avatar" className="_comment_img" />
                 </div>
                 <div className="_feed_inner_comment_box_content_txt">
                   <textarea

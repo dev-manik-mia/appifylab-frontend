@@ -41,8 +41,8 @@ export default function PostForm({ onPostCreated }: Props) {
       setImage(null);
       setImagePreview(null);
       onPostCreated?.();
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error('Failed to create post:', err);
     } finally {
       setLoading(false);
     }
@@ -53,7 +53,7 @@ export default function PostForm({ onPostCreated }: Props) {
       <form onSubmit={handleSubmit}>
         <div className="_feed_inner_text_area_box">
           <div className="_feed_inner_text_area_box_image">
-            <img src="/assets/images/txt_img.png" alt="Image" className="_txt_img" />
+            <img src="/assets/images/txt_img.png" alt="User avatar" className="_txt_img" />
           </div>
           <div className="form-floating _feed_inner_text_area_box_form">
             <textarea
