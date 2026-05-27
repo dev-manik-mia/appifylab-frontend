@@ -1985,6 +1985,9 @@
 ._comment_img {
     max-width: 26px;
 }
+._comment_empty {
+    margin-left: 30px;
+}
 ._feed_inner_comment_box_content {
     display: -webkit-box;
     display: -ms-flexbox;
