@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 
 interface User {
@@ -32,6 +33,7 @@ function removeCookie(name: string) {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -86,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setCookie('token', newToken);
     setToken(newToken);
     setUser(newUser);
-    window.location.href = '/';
+    router.push('/');
   };
 
   const register = async (firstName: string, lastName: string, email: string, password: string) => {
@@ -97,7 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setCookie('token', data.token);
       setToken(data.token);
       setUser(data.user);
-      window.location.href = '/';
+      router.push('/');
     } else {
       await login(email, password);
     }
@@ -113,7 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     removeCookie('token');
     setToken(null);
     setUser(null);
-    window.location.href = '/login';
+    router.push('/login');
   };
 
   return (

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useAuth } from '@/app/context/AuthContext';
 
 export default function RegisterPage() {
@@ -176,7 +177,7 @@ export default function RegisterPage() {
                 <div className="row">
                   <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                     <div className="_social_registration_bottom_txt">
-                      <p className="_social_registration_bottom_txt_para">Already have an account? <a href="/login">Login</a></p>
+                      <p className="_social_registration_bottom_txt_para">Already have an account? <Link href="/login">Login</Link></p>
                     </div>
                   </div>
                 </div>
